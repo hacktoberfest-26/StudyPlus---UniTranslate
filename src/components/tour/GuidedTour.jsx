@@ -73,7 +73,7 @@ export const TOUR_STEPS = [
     target: 'skill-tree',
     tab: 'skills',
     title: 'Skill tree & careers',
-    body: 'Follow how foundation courses unlock advanced subjects and careers. Tap any course or career to highlight the exact path that leads to it.',
+    body: 'Follow how foundation courses unlock advanced subjects and careers. Tap a course to add it to your plan, preview it or read its syllabus. Tap a career to highlight the exact path that leads to it.',
   },
   {
     target: 'tutor',

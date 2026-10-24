@@ -1,11 +1,12 @@
 import { useEffect, useMemo, useRef, useState } from 'react';
-import { CircleCheck, CircleAlert, Lock, LockOpen, Target, BookOpen } from 'lucide-react';
+import { CircleCheck, CircleAlert, Lock, LockOpen, Target, BookOpen, X, Plus, Eye, FileText, Trash2 } from 'lucide-react';
 import { usePlanStore } from '../../store/usePlanStore.js';
 import { usePlanCourses } from '../../store/derived.js';
 import { SKILL_NODES, SKILL_BY_ID, CAREERS } from '../../brain/skillGraph.js';
 import { STUDENT } from '../../brain/student.js';
 import { ancestorsOf, prerequisitesMet } from '../../agents/planning.js';
-import { conflictsWith } from '../../librarian/schedule.js';
+import { conflictsWith, formatSchedule } from '../../librarian/schedule.js';
+import { CAMPUSES } from '../../brain/courses.js';
 
 const MIN_W = 1000;
 const NODE_W = 132;
@@ -30,6 +31,100 @@ const STATUS_STYLE = {
   locked: { box: 'bg-slate-50 border-slate-300', text: 'text-slate-600', Icon: Lock, label: 'Locked' },
   next: { box: 'bg-indigo-50 border-indigo-300', text: 'text-indigo-800', Icon: LockOpen, label: 'Unlocks next semester' },
 };
+
+const POPOVER_W = 264;
+
+/** Action card shown next to a clicked course node: add, remove, preview or read the syllabus. */
+function NodePopover({ node, course, planCourses, canvasWidth, canvasHeight, onClose }) {
+  const addCourse = usePlanStore((s) => s.addCourse);
+  const removeCourse = usePlanStore((s) => s.removeCourse);
+  const previewCourse = usePlanStore((s) => s.previewCourse);
+  const openSyllabus = usePlanStore((s) => s.openSyllabus);
+
+  const left = Math.min(Math.max(node.x + NODE_W / 2 - POPOVER_W / 2, 8), canvasWidth - POPOVER_W - 8);
+  // Tier 3 sits low in the canvas, so its card opens upwards.
+  const vertical = node.tier === 3 ? { bottom: canvasHeight - node.y + 8 } : { top: node.y + NODE_H + 8 };
+
+  const completed = STUDENT.completedSkills.includes(node.id);
+  const inPlan = course && planCourses.some((p) => p.code === course.code);
+  const clashes = course && !inPlan ? conflictsWith(course, planCourses) : [];
+  const missing = node.requires.filter((r) => !STUDENT.completedSkills.includes(r)).map((r) => SKILL_BY_ID[r].label);
+
+  return (
+    <div
+      role="dialog"
+      aria-label={`${node.label} actions`}
+      className="view-enter absolute z-30 bg-white border border-slate-200 rounded-xl shadow-xl p-3 text-left"
+      style={{ left, width: POPOVER_W, ...vertical }}
+    >
+      <div className="flex items-start justify-between gap-2">
+        <div className="min-w-0">
+          {course && <p className="text-[10px] font-mono text-slate-500">{course.code}</p>}
+          <p className="text-sm font-semibold text-slate-900 leading-tight">{node.label}</p>
+        </div>
+        <button onClick={onClose} className="p-1 -m-1 rounded-md text-slate-400 hover:text-slate-700 hover:bg-slate-100" aria-label="Close">
+          <X className="w-4 h-4" aria-hidden />
+        </button>
+      </div>
+
+      {completed ? (
+        <p className="mt-2 text-xs text-green-700 bg-green-50 rounded-lg px-2 py-1.5">✅ You have already passed this course ({node.cfu} CFU).</p>
+      ) : !course ? (
+        <p className="mt-2 text-xs text-slate-600 bg-slate-50 rounded-lg px-2 py-1.5">
+          Not offered this semester. {missing.length ? `Unlocks after: ${missing.join(', ')}.` : 'You can take it in a later semester.'}
+        </p>
+      ) : (
+        <>
+          <p className="text-xs text-slate-600 mt-1">
+            {course.cfu} CFU · {formatSchedule(course)} · {CAMPUSES[course.campus]?.short}
+          </p>
+          <div className="flex flex-wrap gap-1.5 mt-2">
+            {inPlan && <span className="text-[11px] bg-blue-600 text-white px-2 py-0.5 rounded-full">In your plan</span>}
+            {clashes.map((c) => (
+              <span key={c.code} className="text-[11px] bg-red-100 text-red-700 px-2 py-0.5 rounded-full">
+                🔥 Clashes with {c.title}
+              </span>
+            ))}
+            {missing.length > 0 && <span className="text-[11px] bg-amber-100 text-amber-800 px-2 py-0.5 rounded-full">Needs {missing.join(', ')}</span>}
+            {!inPlan && !clashes.length && !missing.length && (
+              <span className="text-[11px] bg-green-100 text-green-700 px-2 py-0.5 rounded-full">✓ Fits your timetable</span>
+            )}
+          </div>
+          <div className="grid grid-cols-3 gap-1.5 mt-3">
+            {inPlan ? (
+              <button
+                onClick={() => removeCourse(course.code)}
+                className="inline-flex items-center justify-center gap-1 border border-red-300 text-red-700 hover:bg-red-50 text-xs font-medium py-1.5 rounded-lg"
+              >
+                <Trash2 className="w-3.5 h-3.5" aria-hidden /> Remove
+              </button>
+            ) : (
+              <button
+                onClick={() => addCourse(course.code)}
+                className="inline-flex items-center justify-center gap-1 bg-blue-600 hover:bg-blue-700 text-white text-xs font-medium py-1.5 rounded-lg"
+              >
+                <Plus className="w-3.5 h-3.5" aria-hidden /> Add
+              </button>
+            )}
+            <button
+              onClick={() => previewCourse(course.code)}
+              disabled={inPlan}
+              className="inline-flex items-center justify-center gap-1 border border-slate-300 hover:bg-slate-50 disabled:opacity-50 text-slate-700 text-xs font-medium py-1.5 rounded-lg"
+            >
+              <Eye className="w-3.5 h-3.5" aria-hidden /> Preview
+            </button>
+            <button
+              onClick={() => openSyllabus(course.code)}
+              className="inline-flex items-center justify-center gap-1 border border-slate-300 hover:bg-slate-50 text-slate-700 text-xs font-medium py-1.5 rounded-lg"
+            >
+              <FileText className="w-3.5 h-3.5" aria-hidden /> Syllabus
+            </button>
+          </div>
+        </>
+      )}
+    </div>
+  );
+}
 
 function rowPositions(items, width, W) {
   return items.map((item, i) => ({ ...item, x: (W / items.length) * (i + 0.5) - width / 2 }));
@@ -56,6 +151,14 @@ export function SkillTree() {
   const askTutor = usePlanStore((s) => s.askTutor);
   const [selected, setSelected] = useState('ai-data-analyst');
   const [canvasRef, W] = useCanvasWidth();
+
+  useEffect(() => {
+    const onKey = (e) => {
+      if (e.key === 'Escape' && !document.querySelector('[data-modal]')) setSelected(null);
+    };
+    document.addEventListener('keydown', onKey);
+    return () => document.removeEventListener('keydown', onKey);
+  }, []);
 
   const { nodes, careers, positions } = useMemo(() => {
     const plannedSkills = new Set(planCourses.map((c) => c.provides));
@@ -127,7 +230,7 @@ export function SkillTree() {
       <div className="bg-white border-b border-slate-200 p-4 flex flex-col md:flex-row md:items-center justify-between gap-2">
         <div>
           <h2 className="text-lg font-semibold text-slate-900">Skill Tree & Career Pathways</h2>
-          <p className="text-sm text-slate-600">Click any course or career to highlight the exact prerequisite path leading to it.</p>
+          <p className="text-sm text-slate-600">Click a course to add it to your plan and highlight its prerequisite path. Click a career to see the path leading to it.</p>
         </div>
         <div className="flex flex-wrap gap-2 text-xs">
           {Object.entries(STATUS_STYLE).map(([id, s]) => (
@@ -140,7 +243,8 @@ export function SkillTree() {
 
       <div className="flex-1 min-h-0 overflow-auto scrollbar-thin p-4 space-y-4">
         <div ref={canvasRef} data-tour="skill-tree" className="overflow-x-auto scrollbar-thin bg-white border border-slate-200 rounded-xl">
-          <div className="relative mx-auto" style={{ width: W, height: H }}>
+          {/* Tapping empty canvas space closes the course card. */}
+          <div className="relative mx-auto" style={{ width: W, height: H }} onClick={(e) => e.target === e.currentTarget && setSelected(null)}>
             {[1, 2, 3, 4].map((t) => (
               <p key={t} className="absolute left-3 z-10 bg-white/90 px-1 rounded text-[11px] font-semibold uppercase tracking-wide text-slate-400" style={{ top: TIER_Y[t] - 24 }}>
                 {TIER_TITLES[t]}
@@ -217,6 +321,18 @@ export function SkillTree() {
                 </button>
               );
             })}
+
+            {selectedNode && (
+              <NodePopover
+                key={selectedNode.id}
+                node={selectedNode}
+                course={catalog.find((c) => c.provides === selectedNode.id)}
+                planCourses={planCourses}
+                canvasWidth={W}
+                canvasHeight={H}
+                onClose={() => setSelected(null)}
+              />
+            )}
           </div>
         </div>
 
