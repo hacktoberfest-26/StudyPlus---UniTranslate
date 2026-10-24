@@ -41,6 +41,11 @@ npm run build    # production bundle in dist/
   - *Course Concept Tutor* mode explains syllabi, syllabus differences and key concepts.
   - Replies render mini course cards with **⚡ Add to Plan** and **📅 Ghost Preview on Calendar**.
 
+- **Guided tour**: opens on the first visit and walks through every area, switching tabs as it goes. Skip it from the first card; replay it anytime with the **Tour** button.
+- **Change confirmations**: an impact agent (`src/agents/impact.js`) compares alerts before and after each change.
+  - Dropping a course always asks first and lists the consequences: lost credits, a released confirmed seat, career skills lost, and new or resolved alerts.
+  - Adding or swapping asks only when the change creates a clash, a missing prerequisite or a credit problem, or when it would reopen a plan that was already submitted.
+
 ## Project layout
 
 ```

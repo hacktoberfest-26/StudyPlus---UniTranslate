@@ -1,4 +1,4 @@
-import { GraduationCap, CircleCheck, ChevronDown, RotateCcw } from 'lucide-react';
+import { GraduationCap, CircleCheck, ChevronDown, RotateCcw, CircleHelp } from 'lucide-react';
 import { usePlanStore } from '../../store/usePlanStore.js';
 import { ROLES } from '../../brain/student.js';
 
@@ -20,6 +20,7 @@ export function Header() {
   const lastSavedAt = usePlanStore((s) => s.lastSavedAt);
   const submission = usePlanStore((s) => s.submission);
   const resetDemo = usePlanStore((s) => s.resetDemo);
+  const startTour = usePlanStore((s) => s.startTour);
   const status = SUBMISSION_LABELS[submission];
 
   return (
@@ -38,7 +39,7 @@ export function Header() {
         </div>
 
         <div className="flex items-center gap-2">
-          <label className="relative">
+          <label className="relative" data-tour="role">
             <span className="sr-only">Switch role</span>
             <select
               value={role}
@@ -54,6 +55,15 @@ export function Header() {
             <ChevronDown className="w-4 h-4 text-slate-500 absolute right-3 top-1/2 -translate-y-1/2 pointer-events-none" aria-hidden />
           </label>
           <button
+            onClick={startTour}
+            data-tour="help"
+            className="inline-flex items-center gap-1.5 px-3 py-2 rounded-lg border border-slate-300 text-sm font-medium text-slate-600 hover:bg-slate-100 focus:outline-none focus:ring-2 focus:ring-blue-500"
+          >
+            <CircleHelp className="w-4 h-4" aria-hidden />
+            <span className="hidden sm:inline">Tour</span>
+            <span className="sr-only sm:hidden">Start the guided tour</span>
+          </button>
+          <button
             onClick={resetDemo}
             title="Reset demo data"
             aria-label="Reset demo data"
@@ -64,7 +74,7 @@ export function Header() {
         </div>
       </div>
 
-      <div className="mt-3 flex items-center gap-2 text-xs sm:text-sm text-slate-600 bg-slate-50 border border-slate-200 px-3 py-2 rounded-lg" role="status">
+      <div data-tour="autosave" className="mt-3 flex items-center gap-2 text-xs sm:text-sm text-slate-600 bg-slate-50 border border-slate-200 px-3 py-2 rounded-lg" role="status">
         <CircleCheck className="w-4 h-4 text-green-600 shrink-0" aria-hidden />
         <span>
           Draft saved automatically at {formatSavedAt(lastSavedAt)} • Status: <span className={`font-semibold ${status.className}`}>{status.label}</span>

@@ -1,3 +1,4 @@
+import { useEffect } from 'react';
 import { usePlanStore } from './store/usePlanStore.js';
 import { useAlerts } from './store/derived.js';
 import { Header } from './components/layout/Header.jsx';
@@ -11,6 +12,8 @@ import { SyllabusModal } from './components/catalogue/SyllabusModal.jsx';
 import { ScheduleCalendar } from './components/schedule/ScheduleCalendar.jsx';
 import { SkillTree } from './components/skills/SkillTree.jsx';
 import { AdvisorChatbot, ChatDrawer } from './components/chat/AdvisorChatbot.jsx';
+import { ConfirmChangeDialog } from './components/alerts/ConfirmChangeDialog.jsx';
+import { GuidedTour } from './components/tour/GuidedTour.jsx';
 
 const VIEWS = {
   catalog: CourseCatalogue,
@@ -58,6 +61,13 @@ function Toasts() {
 export default function App() {
   const activeTab = usePlanStore((s) => s.activeTab);
   const View = VIEWS[activeTab];
+  const tourDone = usePlanStore((s) => s.tourDone);
+  const startTour = usePlanStore((s) => s.startTour);
+
+  // First visit: open the guided tour (it can be skipped on the first card).
+  useEffect(() => {
+    if (!tourDone) startTour();
+  }, []); // eslint-disable-line react-hooks/exhaustive-deps
 
   return (
     <div className="min-h-screen lg:h-screen flex flex-col bg-slate-50 font-sans text-slate-900">
@@ -91,6 +101,8 @@ export default function App() {
       <ComparisonDrawer />
       <SyllabusModal />
       <ChatDrawer />
+      <ConfirmChangeDialog />
+      <GuidedTour />
       <Toasts />
     </div>
   );

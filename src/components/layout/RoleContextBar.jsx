@@ -83,7 +83,7 @@ export function RoleContextBar() {
   const warnings = alerts.filter((a) => a.severity === 'warning').length;
 
   return (
-    <div className="px-4 sm:px-6 pb-3">
+    <div className="px-4 sm:px-6 pb-3" data-tour="role-bar">
       {role === 'student' && <StudentBar critical={critical} />}
       {role === 'advisor' && <AdvisorBar critical={critical} warnings={warnings} />}
       {role === 'admin' && <LibrarianConsole />}

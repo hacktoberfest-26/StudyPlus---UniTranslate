@@ -10,6 +10,7 @@ import { RAW_SYLLABUS_FEED } from '../brain/rawFeed.js';
 import { normalizeCourse } from '../librarian/normalize.js';
 import { ingestFeed } from '../librarian/ingest.js';
 import { tutorRespond } from '../agents/tutorEngine.js';
+import { assessChange } from '../agents/impact.js';
 
 const initialCatalog = () => BRAIN_COURSES.map((raw) => normalizeCourse(raw).course);
 
@@ -36,6 +37,9 @@ const initialState = () => ({
   messages: [],
   typing: false,
   toasts: [],
+  pendingChange: null,
+  tourDone: false,
+  tourStep: null,
 });
 
 export const usePlanStore = create(
@@ -57,6 +61,46 @@ export const usePlanStore = create(
         setTimeout(() => set((s) => ({ toasts: s.toasts.filter((t) => t.id !== id) })), 3200);
       };
 
+      /** Commits an add / remove / swap and reports it. */
+      const applyChange = ({ kind, codes }) => {
+        const titles = codes.map((c) => findCourse(c)?.title ?? c);
+        const plan = get().plan;
+        if (kind === 'remove') {
+          commitPlan(plan.filter((p) => !codes.includes(p.code)));
+          toast(`Dropped "${titles[0]}" from your plan.`);
+        } else if (kind === 'swap') {
+          const [drop, add] = codes;
+          commitPlan([...plan.filter((p) => p.code !== drop && p.code !== add), { code: add, status: 'draft' }]);
+          set({ ghostCode: null });
+          toast(`Swap applied: "${titles[1]}" replaces "${titles[0]}".`, 'success');
+        } else {
+          commitPlan([...plan, ...codes.map((code) => ({ code, status: 'draft' }))]);
+          if (codes.includes(get().ghostCode)) set({ ghostCode: null });
+          toast(codes.length === 1 ? `Added "${titles[0]}" to your draft plan.` : `Added ${codes.length} courses to your draft plan.`, 'success');
+        }
+      };
+
+      /**
+       * Every plan change goes through the impact agent first. Drops always ask for
+       * confirmation; adds and swaps ask only when they create a new problem.
+       */
+      const proposeChange = (change) => {
+        const { plan, catalog, submission } = get();
+        const { effects, needsConfirm } = assessChange({ plan, catalog, student: STUDENT, change });
+        const reopens = submission === 'submitted' || submission === 'approved';
+        if (reopens) {
+          effects.push({
+            tone: 'warning',
+            text: `Your plan is currently ${submission === 'approved' ? 'approved' : 'submitted for review'}. This change sets it back to Active Draft, so you will need to submit it again.`,
+          });
+        }
+        if (!needsConfirm && !reopens) {
+          applyChange(change);
+          return;
+        }
+        set({ pendingChange: { change, effects } });
+      };
+
       return {
         ...initialState(),
         toast,
@@ -72,9 +116,7 @@ export const usePlanStore = create(
             toast(`"${course.title}" is already in your draft plan.`);
             return;
           }
-          commitPlan([...get().plan, { code, status: 'draft' }]);
-          if (get().ghostCode === code) set({ ghostCode: null });
-          toast(`Added "${course.title}" to your draft plan.`, 'success');
+          proposeChange({ kind: 'add', codes: [code] });
         },
 
         addMany: (codes) => {
@@ -83,24 +125,27 @@ export const usePlanStore = create(
             toast('Those courses are already in your draft plan.');
             return;
           }
-          commitPlan([...get().plan, ...fresh.map((code) => ({ code, status: 'draft' }))]);
-          toast(`Added ${fresh.length} course(s) to your draft plan.`, 'success');
+          proposeChange({ kind: 'add', codes: fresh });
         },
 
         removeCourse: (code) => {
-          const course = findCourse(code);
-          commitPlan(get().plan.filter((p) => p.code !== code));
-          toast(`Dropped "${course?.title ?? code}" from your plan.`);
+          if (findCourse(code)) proposeChange({ kind: 'remove', codes: [code] });
         },
 
         swapCourse: (dropCode, addCode) => {
-          const drop = findCourse(dropCode);
-          const add = findCourse(addCode);
-          if (!drop || !add) return;
-          commitPlan([...get().plan.filter((p) => p.code !== dropCode && p.code !== addCode), { code: addCode, status: 'draft' }]);
-          set({ ghostCode: null });
-          toast(`Smart recommendation applied: "${add.title}" replaces "${drop.title}".`, 'success');
+          if (findCourse(dropCode) && findCourse(addCode)) proposeChange({ kind: 'swap', codes: [dropCode, addCode] });
         },
+
+        confirmPendingChange: () => {
+          const pending = get().pendingChange;
+          set({ pendingChange: null });
+          if (pending) applyChange(pending.change);
+        },
+        cancelPendingChange: () => set({ pendingChange: null }),
+
+        startTour: () => set({ tourStep: 0, chatOpen: false, compareOpen: false, syllabusCode: null }),
+        setTourStep: (tourStep) => set({ tourStep }),
+        endTour: () => set({ tourStep: null, tourDone: true, activeTab: 'catalog' }),
 
         previewCourse: (code) => {
           set({ ghostCode: code, activeTab: 'schedule', scheduleMode: 'draft', chatOpen: false, compareOpen: false });
@@ -198,7 +243,7 @@ export const usePlanStore = create(
         },
 
         resetDemo: () => {
-          set({ ...initialState(), role: get().role });
+          set({ ...initialState(), role: get().role, tourDone: get().tourDone });
           toast('Demo data reset.');
         },
       };
@@ -214,6 +259,7 @@ export const usePlanStore = create(
         advisorNote: s.advisorNote,
         lastSavedAt: s.lastSavedAt,
         ingestReport: s.ingestReport,
+        tourDone: s.tourDone,
       }),
     },
   ),

@@ -90,6 +90,7 @@ export function ProactiveAlerts() {
   return (
     <aside
       aria-label="H-OS Agent Alerts"
+      data-tour="alerts"
       className="lg:w-80 xl:w-96 shrink-0 bg-white border-b lg:border-b-0 lg:border-r border-slate-200 flex flex-col lg:min-h-0"
     >
       <div className={`p-3 border-b border-slate-200 ${critical ? 'bg-red-50' : 'bg-slate-50'}`}>

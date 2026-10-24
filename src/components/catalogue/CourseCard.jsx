@@ -22,6 +22,7 @@ export function CourseCard({ course }) {
 
   return (
     <article
+      data-tour="course-card"
       className={`bg-white border rounded-xl p-4 sm:p-5 hover:shadow-lg transition-shadow flex flex-col ${
         entry ? 'border-blue-300 ring-1 ring-blue-200' : 'border-slate-200'
       }`}

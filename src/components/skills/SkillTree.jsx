@@ -139,7 +139,7 @@ export function SkillTree() {
       </div>
 
       <div className="flex-1 min-h-0 overflow-auto scrollbar-thin p-4 space-y-4">
-        <div ref={canvasRef} className="overflow-x-auto scrollbar-thin bg-white border border-slate-200 rounded-xl">
+        <div ref={canvasRef} data-tour="skill-tree" className="overflow-x-auto scrollbar-thin bg-white border border-slate-200 rounded-xl">
           <div className="relative mx-auto" style={{ width: W, height: H }}>
             {[1, 2, 3, 4].map((t) => (
               <p key={t} className="absolute left-3 z-10 bg-white/90 px-1 rounded text-[11px] font-semibold uppercase tracking-wide text-slate-400" style={{ top: TIER_Y[t] - 24 }}>

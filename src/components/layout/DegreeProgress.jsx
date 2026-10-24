@@ -9,7 +9,7 @@ export function DegreeProgress() {
   const pct = (v) => `${(v / totalCfu) * 100}%`;
 
   return (
-    <section className="px-4 sm:px-6 py-3" aria-label="Degree progress">
+    <section data-tour="progress" className="px-4 sm:px-6 py-3" aria-label="Degree progress">
       <div className="flex flex-wrap items-baseline justify-between gap-2 mb-2">
         <h2 className="text-sm font-semibold text-slate-700">3-Year Degree Progress</h2>
         <span className="text-sm text-slate-600">

@@ -7,6 +7,7 @@ import { ingestFeed } from '../librarian/ingest.js';
 import { findConflicts, sessionsOverlap } from '../librarian/schedule.js';
 import { runProactiveAgents } from './proactiveAgent.js';
 import { tutorRespond } from './tutorEngine.js';
+import { assessChange } from './impact.js';
 
 const catalog = BRAIN_COURSES.map((raw) => normalizeCourse(raw).course);
 const byCode = Object.fromEntries(catalog.map((c) => [c.code, c]));
@@ -78,5 +79,29 @@ describe('AI tutor', () => {
     const plan = swappedPlan.map((p) => byCode[p.code]);
     expect(picked.reduce((s, c) => s + c.cfu, 0)).toBeGreaterThanOrEqual(6);
     expect(findConflicts([...plan, ...picked])).toHaveLength(0);
+  });
+});
+
+describe('Impact agent', () => {
+  it('always asks before dropping and lists what the drop causes', () => {
+    const { needsConfirm, effects } = assessChange({ plan: INITIAL_PLAN, catalog, student: STUDENT, change: { kind: 'remove', codes: ['DBS-210'] } });
+    expect(needsConfirm).toBe(true);
+    const text = effects.map((e) => e.text).join('\n');
+    expect(text).toContain('confirmed enrolment');
+    expect(text).toContain('mandatory this semester');
+    expect(text).toContain('Resolves:');
+  });
+
+  it('asks before adding a course that clashes or lacks prerequisites', () => {
+    const clash = assessChange({ plan: swappedPlan, catalog, student: STUDENT, change: { kind: 'add', codes: ['ADS-301'] } });
+    expect(clash.needsConfirm).toBe(true);
+    expect(clash.effects.some((e) => e.tone === 'critical')).toBe(true);
+    const prereq = assessChange({ plan: swappedPlan, catalog, student: STUDENT, change: { kind: 'add', codes: ['ML-320'] } });
+    expect(prereq.effects.some((e) => e.tone === 'warning' && e.text.includes('Linear Algebra'))).toBe(true);
+  });
+
+  it('adds a harmless course without asking', () => {
+    const { needsConfirm } = assessChange({ plan: swappedPlan, catalog, student: STUDENT, change: { kind: 'add', codes: ['DMN-310'] } });
+    expect(needsConfirm).toBe(false);
   });
 });

@@ -38,7 +38,7 @@ export function CourseCatalogue() {
 
   return (
     <div className="flex flex-col min-h-0 h-full">
-      <div className="bg-white border-b border-slate-200 p-4 space-y-3">
+      <div data-tour="catalog-filters" className="bg-white border-b border-slate-200 p-4 space-y-3">
         <div className="flex flex-col md:flex-row gap-3">
           <label className="relative flex-1 min-w-0">
             <span className="sr-only">Search courses</span>

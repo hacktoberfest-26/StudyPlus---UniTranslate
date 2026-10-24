@@ -74,7 +74,7 @@ export function AdvisorChatbot({ onClose }) {
   };
 
   return (
-    <div className="flex flex-col h-full min-h-0 bg-white">
+    <div className="flex flex-col h-full min-h-0 bg-white" data-tour={onClose ? undefined : 'tutor'}>
       <div className="bg-gradient-to-r from-purple-600 to-indigo-600 text-white p-4 flex items-center justify-between gap-2">
         <div className="flex items-center gap-3 min-w-0">
           <div className="w-10 h-10 bg-white/20 rounded-full flex items-center justify-center shrink-0">
@@ -173,7 +173,7 @@ export function AdvisorChatbot({ onClose }) {
       </div>
 
       <div className="border-t border-slate-200 p-3 bg-slate-50">
-        <p className="text-xs font-medium text-slate-600 mb-2">Quick prompts</p>
+        <p className="text-xs font-medium text-slate-600 mb-2" data-tour={onClose ? undefined : 'quick-prompts'}>Quick prompts</p>
         <div className="flex flex-wrap gap-2">
           {QUICK_PROMPTS.map((p) => (
             <button

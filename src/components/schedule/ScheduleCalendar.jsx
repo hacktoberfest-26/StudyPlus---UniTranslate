@@ -127,7 +127,7 @@ export function ScheduleCalendar() {
       <div className="bg-white border-b border-slate-200 p-4 flex flex-col xl:flex-row xl:items-center justify-between gap-3">
         <div className="flex flex-wrap items-center gap-3">
           <h2 className="text-lg font-semibold text-slate-900">Weekly Timetable</h2>
-          <div className="flex items-center gap-1 bg-slate-100 rounded-full p-1" role="radiogroup" aria-label="View mode">
+          <div className="flex items-center gap-1 bg-slate-100 rounded-full p-1" role="radiogroup" aria-label="View mode" data-tour="view-mode">
             <span className="text-xs text-slate-500 px-2">View Mode:</span>
             {[
               ['confirmed', 'Confirmed Schedule'],
@@ -187,7 +187,7 @@ export function ScheduleCalendar() {
 
       <div className="flex-1 min-h-0 overflow-auto scrollbar-thin p-4 flex flex-col xl:flex-row gap-4">
         <div className="flex-1 overflow-x-auto scrollbar-thin">
-          <div className="min-w-[720px] bg-white border border-slate-200 rounded-xl overflow-hidden">
+          <div data-tour="calendar" className="min-w-[720px] bg-white border border-slate-200 rounded-xl overflow-hidden">
             <div className="grid grid-cols-[56px_repeat(5,1fr)] border-b border-slate-200 bg-slate-50">
               <div />
               {DAYS.map((d) => (
@@ -234,7 +234,7 @@ export function ScheduleCalendar() {
           </div>
         </div>
 
-        <aside className="xl:w-64 shrink-0 bg-white border border-slate-200 rounded-xl p-3 self-start w-full" aria-label="Ghost preview picker">
+        <aside className="xl:w-64 shrink-0 bg-white border border-slate-200 rounded-xl p-3 self-start w-full" aria-label="Ghost preview picker" data-tour="ghost-picker">
           <h3 className="text-sm font-semibold text-slate-900">👻 Ghost Preview</h3>
           {isDraft ? (
             <>

@@ -1,4 +1,4 @@
-import { useEffect } from 'react';
+import { useEffect, useRef } from 'react';
 import { Star, StarHalf } from 'lucide-react';
 import { COURSE_TYPES } from '../../brain/courses.js';
 
@@ -41,8 +41,13 @@ export function RichText({ text }) {
 }
 
 export function Modal({ title, onClose, children, wide = false }) {
+  const ref = useRef(null);
   useEffect(() => {
-    const onKey = (e) => e.key === 'Escape' && onClose();
+    // With stacked modals (e.g. a confirmation over the comparison), Escape closes only the top one.
+    const onKey = (e) => {
+      const open = document.querySelectorAll('[data-modal]');
+      if (e.key === 'Escape' && open[open.length - 1] === ref.current) onClose();
+    };
     document.addEventListener('keydown', onKey);
     return () => document.removeEventListener('keydown', onKey);
   }, [onClose]);
@@ -50,6 +55,8 @@ export function Modal({ title, onClose, children, wide = false }) {
   return (
     <div className="fixed inset-0 z-50 flex items-end sm:items-center justify-center bg-slate-900/50 p-0 sm:p-4" onClick={onClose}>
       <div
+        ref={ref}
+        data-modal
         role="dialog"
         aria-modal="true"
         aria-label={title}
