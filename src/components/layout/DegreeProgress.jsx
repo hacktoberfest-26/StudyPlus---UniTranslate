@@ -23,23 +23,24 @@ export function DegreeProgress() {
       <div
         className="w-full bg-slate-200 rounded-full h-3 overflow-hidden flex"
         role="progressbar"
+        aria-label="Degree progress"
         aria-valuemin={0}
         aria-valuemax={totalCfu}
         aria-valuenow={completed}
         aria-valuetext={`${completed} of ${totalCfu} CFU completed, ${draftTotal} planned`}
       >
         {buckets.map((b) => (
-          <div key={`done-${b.id}`} className={`${b.bar} h-full transition-all duration-500`} style={{ width: pct(STUDENT.completedCfu[b.id]) }} />
+          <div key={`done-${b.id}`} className={`${b.bar} bucket-${b.id} h-full transition-all duration-500`} style={{ width: pct(STUDENT.completedCfu[b.id]) }} />
         ))}
         {buckets.map((b) => (
-          <div key={`draft-${b.id}`} className={`${b.bar} striped opacity-60 h-full transition-all duration-500`} style={{ width: pct(byBucket[b.id] ?? 0) }} />
+          <div key={`draft-${b.id}`} className={`${b.bar} bucket-${b.id} striped opacity-60 h-full transition-all duration-500`} style={{ width: pct(byBucket[b.id] ?? 0) }} />
         ))}
       </div>
 
       <div className="flex flex-wrap gap-x-5 gap-y-1 mt-2">
         {buckets.map((b) => (
           <div key={b.id} className="flex items-center gap-2 text-xs">
-            <span className={`w-3 h-3 ${b.bar} rounded-full`} aria-hidden />
+            <span className={`w-3 h-3 ${b.bar} bucket-${b.id} rounded-full`} aria-hidden />
             <span className="text-slate-600">
               {b.label}: <span className="font-semibold text-slate-800">{STUDENT.completedCfu[b.id]}</span>/{b.required} CFU
               {byBucket[b.id] > 0 && <span className={b.text}> (+{byBucket[b.id]} planned)</span>}

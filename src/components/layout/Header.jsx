@@ -1,12 +1,13 @@
 import { GraduationCap, CircleCheck, ChevronDown, RotateCcw, CircleHelp, ClipboardCheck, Database } from 'lucide-react';
 import { usePlanStore } from '../../store/usePlanStore.js';
 import { ROLES } from '../../brain/student.js';
+import { DisplaySettingsButton } from './DisplaySettings.jsx';
 
 /** Visual identity of each role's workspace, so the three interfaces are easy to tell apart. */
 const WORKSPACES = {
   student: { title: 'Student workspace · Alex', logo: 'from-blue-600 to-indigo-600', Icon: GraduationCap },
   advisor: { title: 'Advisor workspace · Prof. Rossi', logo: 'from-emerald-600 to-teal-600', Icon: ClipboardCheck },
-  admin: { title: 'Admin workspace · Department office', logo: 'from-slate-700 to-slate-900', Icon: Database },
+  admin: { title: 'Admin workspace · Department office', logo: 'from-ink-700 to-ink-900', Icon: Database },
 };
 
 const SUBMISSION_LABELS = {
@@ -66,6 +67,7 @@ export function Header() {
             </select>
             <ChevronDown className="w-4 h-4 text-slate-500 absolute right-3 top-1/2 -translate-y-1/2 pointer-events-none" aria-hidden />
           </label>
+          <DisplaySettingsButton />
           <button
             onClick={startTour}
             data-tour="help"

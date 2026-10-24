@@ -89,7 +89,7 @@ export function AdviseesDashboard() {
                   {a.live ? (
                     <button
                       onClick={() => setTab('review')}
-                      className="whitespace-nowrap inline-flex items-center gap-1 bg-emerald-600 hover:bg-emerald-700 text-white text-xs font-medium px-3 py-1.5 rounded-lg"
+                      className="whitespace-nowrap inline-flex items-center gap-1 bg-emerald-700 hover:bg-emerald-800 text-white text-xs font-medium px-3 py-1.5 rounded-lg"
                     >
                       Review plan <ArrowRight className="w-3.5 h-3.5" aria-hidden />
                     </button>

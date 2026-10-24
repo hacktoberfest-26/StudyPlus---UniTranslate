@@ -38,7 +38,7 @@ export function DepartmentTimetable() {
           </label>
           {Object.entries(COURSE_TYPES).map(([id, t]) => (
             <span key={id} className="flex items-center gap-1.5 text-slate-600">
-              <span className={`w-3.5 h-3.5 rounded ${t.block}`} aria-hidden /> {t.label}
+              <span className={`w-3.5 h-3.5 rounded ${t.block} type-${id}`} aria-hidden /> {t.label}
             </span>
           ))}
         </div>
@@ -69,7 +69,7 @@ export function DepartmentTimetable() {
           )}
         </section>
 
-        <div className="overflow-x-auto scrollbar-thin">
+        <div className="overflow-x-auto scrollbar-thin" tabIndex={0} role="region" aria-label="Department weekly timetable">
           <WeekGrid courses={courses} tourId="dept-timetable" collisionLabel="⚠️ Slot clash" />
         </div>
       </div>

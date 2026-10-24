@@ -34,8 +34,8 @@ const STYLES = {
 };
 
 function actionClass(kind, primary) {
-  if (kind === 'swap') return 'bg-green-600 hover:bg-green-700 text-white';
-  if (kind === 'drop') return primary ? 'bg-slate-700 hover:bg-slate-800 text-white' : 'border border-slate-400 text-slate-700 hover:bg-white';
+  if (kind === 'swap') return 'bg-green-700 hover:bg-green-800 text-white';
+  if (kind === 'drop') return primary ? 'bg-ink-700 hover:bg-ink-800 text-white' : 'border border-slate-400 text-slate-700 hover:bg-white';
   return 'bg-white border border-slate-300 text-slate-700 hover:border-slate-400';
 }
 
@@ -46,8 +46,8 @@ export function AlertCard({ alert, readOnly = false }) {
   const { Icon } = style;
 
   return (
-    <li className={`rounded-lg p-3 ${style.card}`} role={alert.severity === 'critical' ? 'alert' : undefined}>
-      <div className="flex items-start gap-3">
+    <li className={`rounded-lg p-3 ${style.card}`}>
+      <div className="flex items-start gap-3" role={alert.severity === 'critical' ? 'alert' : undefined}>
         <div className={`w-8 h-8 rounded-full flex items-center justify-center shrink-0 ${style.icon}`}>
           <Icon className="w-4 h-4" aria-hidden />
         </div>
@@ -110,7 +110,7 @@ export function ProactiveAlerts() {
             <p className="text-xs text-slate-500">Management by exception · live</p>
           </div>
           {actionable > 0 && (
-            <span className={`ml-auto text-xs text-white px-2 py-0.5 rounded-full ${critical ? 'bg-red-600' : 'bg-amber-500'}`}>
+            <span className={`ml-auto text-xs text-white px-2 py-0.5 rounded-full ${critical ? 'bg-red-600' : 'bg-amber-700'}`}>
               {actionable} Action{actionable > 1 ? 's' : ''} Required
             </span>
           )}

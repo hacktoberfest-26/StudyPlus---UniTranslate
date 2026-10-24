@@ -262,7 +262,7 @@ export function SkillTree() {
                     key={`${from}-${to}`}
                     d={`M ${a.cx} ${a.bottom} C ${a.cx} ${midY}, ${b.cx} ${midY}, ${b.cx} ${b.top}`}
                     fill="none"
-                    stroke={on ? '#f59e0b' : '#cbd5e1'}
+                    stroke={on ? 'var(--color-amber-500, #f59e0b)' : 'var(--edge)'}
                     strokeWidth={on ? 3 : 1.5}
                     opacity={selected && !on ? 0.45 : 1}
                   />
@@ -280,7 +280,7 @@ export function SkillTree() {
                   onClick={() => setSelected(selected === n.id ? null : n.id)}
                   aria-pressed={selected === n.id}
                   className={`absolute text-left rounded-xl border-2 p-2.5 overflow-hidden transition-all hover:scale-105 focus:outline-none focus:ring-2 focus:ring-blue-500 ${st.box} ${
-                    on ? 'shadow-[0_0_0_3px_#fbbf24,0_0_18px_rgba(251,191,36,0.5)]' : selected ? 'opacity-60' : ''
+                    on ? 'shadow-[0_0_0_3px_#fbbf24,0_0_18px_rgba(251,191,36,0.5)]' : selected ? 'saturate-[.35]' : ''
                   }`}
                   style={{ left: n.x, top: n.y, width: NODE_W, height: NODE_H }}
                 >
@@ -288,7 +288,7 @@ export function SkillTree() {
                     <Icon className="w-4 h-4 shrink-0" aria-hidden />
                     {n.label}
                   </span>
-                  <span className={`block text-[11px] mt-1 ${st.text} opacity-80`}>
+                  <span className={`block text-[11px] mt-1 ${st.text}`}>
                     {n.cfu} CFU · {n.status === 'locked' && n.requires.length ? `After ${n.requires.map((r) => SKILL_BY_ID[r].label).join(', ')}` : st.label}
                   </span>
                 </button>
@@ -302,20 +302,20 @@ export function SkillTree() {
                   key={c.id}
                   onClick={() => setSelected(on ? null : c.id)}
                   aria-pressed={on}
-                  className={`absolute text-left rounded-xl p-3 bg-gradient-to-br from-slate-800 to-slate-900 text-white shadow-lg transition-all hover:scale-105 focus:outline-none focus:ring-2 focus:ring-amber-400 ${
-                    on ? 'ring-4 ring-amber-400' : selected ? 'opacity-70' : ''
+                  className={`absolute text-left rounded-xl p-3 bg-gradient-to-br from-ink-800 to-ink-900 text-white shadow-lg transition-all hover:scale-105 focus:outline-none focus:ring-2 focus:ring-amber-400 ${
+                    on ? 'ring-4 ring-amber-400' : selected ? 'saturate-[.35]' : ''
                   }`}
                   style={{ left: c.x, top: c.y, width: CAREER_W, height: CAREER_H }}
                 >
                   <span className="flex items-center gap-1.5 font-bold text-sm">🎯 {c.label}</span>
                   <span className="flex items-center gap-2 mt-1">
-                    <span className={`text-[10px] px-2 py-0.5 rounded-full ${c.demand.startsWith('High') ? 'bg-green-500' : 'bg-amber-500'}`}>{c.demand}</span>
-                    <span className="text-xs text-slate-300">{c.salary}</span>
+                    <span className={`text-[10px] px-2 py-0.5 rounded-full ${c.demand.startsWith('High') ? 'bg-green-700' : 'bg-amber-700'}`}>{c.demand}</span>
+                    <span className="text-xs text-ink-300">{c.salary}</span>
                   </span>
-                  <span className="block mt-2 h-1.5 bg-slate-700 rounded-full overflow-hidden">
+                  <span className="block mt-2 h-1.5 bg-ink-700 rounded-full overflow-hidden">
                     <span className="block h-full bg-amber-400" style={{ width: `${(c.progress / c.requires.length) * 100}%` }} />
                   </span>
-                  <span className="block text-[10px] text-slate-400 mt-0.5">
+                  <span className="block text-[10px] text-ink-400 mt-0.5">
                     {c.progress}/{c.requires.length} key skills completed or planned
                   </span>
                 </button>

@@ -19,6 +19,7 @@ import { PlanReview } from './components/advisor/PlanReview.jsx';
 import { CourseDataAdmin } from './components/admin/CourseDataAdmin.jsx';
 import { DepartmentTimetable } from './components/admin/DepartmentTimetable.jsx';
 import { useActiveTab } from './components/layout/TabNav.jsx';
+import { useApplyDisplayPrefs } from './display/useApplyDisplayPrefs.js';
 
 const VIEWS = {
   // Student
@@ -59,7 +60,7 @@ function MobileCriticalStrip() {
 
 function Toasts() {
   const toasts = usePlanStore((s) => s.toasts);
-  const tone = { success: 'bg-green-600', warning: 'bg-amber-600', info: 'bg-slate-800' };
+  const tone = { success: 'bg-green-700', warning: 'bg-amber-700', info: 'bg-ink-800' };
   return (
     <div className="fixed bottom-24 left-1/2 -translate-x-1/2 z-[60] flex flex-col items-center gap-2 w-[min(92vw,28rem)] pointer-events-none" aria-live="polite">
       {toasts.map((t) => (
@@ -72,6 +73,7 @@ function Toasts() {
 }
 
 export default function App() {
+  useApplyDisplayPrefs();
   const role = usePlanStore((s) => s.role);
   const activeTab = useActiveTab();
   const View = VIEWS[activeTab];
@@ -86,6 +88,9 @@ export default function App() {
 
   return (
     <div className="min-h-screen lg:h-screen flex flex-col bg-slate-50 font-sans text-slate-900">
+      <a href="#main-content" className="skip-link">
+        Skip to main content
+      </a>
       {isStudent && <MobileCriticalStrip />}
       <header className="bg-white border-b border-slate-200 shrink-0">
         <Header />
@@ -98,7 +103,8 @@ export default function App() {
         {isStudent && <ProactiveAlerts />}
         <main
           key={activeTab}
-          id={`view-${activeTab}`}
+          tabIndex={-1}
+          id="main-content"
           role="tabpanel"
           aria-labelledby={`tab-${activeTab}`}
           className={`view-enter flex-1 min-w-0 min-h-[70vh] lg:min-h-0 flex flex-col ${activeTab === 'advisor' ? 'p-0 sm:p-4' : ''}`}

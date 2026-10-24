@@ -62,7 +62,7 @@ export function ScheduleCalendar() {
         <div className="flex flex-wrap items-center gap-3 text-xs">
           {Object.entries(COURSE_TYPES).map(([id, t]) => (
             <span key={id} className="flex items-center gap-1.5 text-slate-600">
-              <span className={`w-3.5 h-3.5 rounded ${t.block}`} aria-hidden /> {t.label}
+              <span className={`w-3.5 h-3.5 rounded ${t.block} type-${id}`} aria-hidden /> {t.label}
             </span>
           ))}
           <span className="flex items-center gap-1.5 text-slate-600">
@@ -95,7 +95,7 @@ export function ScheduleCalendar() {
       )}
 
       <div className="flex-1 min-h-0 overflow-auto scrollbar-thin p-4 flex flex-col xl:flex-row gap-4">
-        <div className="flex-1 overflow-x-auto scrollbar-thin">
+        <div className="flex-1 overflow-x-auto scrollbar-thin" tabIndex={0} role="region" aria-label="Weekly timetable">
           <WeekGrid courses={shown} ghost={ghost} onRemove={removeCourse} tourId="calendar" />
         </div>
 

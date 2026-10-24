@@ -44,7 +44,7 @@ export function ConfirmChangeDialog() {
     confirmLabel = hasConflict || hasWarning ? 'Add anyway' : 'Add to plan';
   }
   const confirmClass =
-    change.kind === 'remove' || hasConflict ? 'bg-red-600 hover:bg-red-700' : hasWarning ? 'bg-amber-600 hover:bg-amber-700' : 'bg-blue-600 hover:bg-blue-700';
+    change.kind === 'remove' || hasConflict ? 'bg-red-600 hover:bg-red-700' : hasWarning ? 'bg-amber-700 hover:bg-amber-800' : 'bg-blue-600 hover:bg-blue-700';
 
   return (
     <Modal title={title} onClose={cancel}>

@@ -94,6 +94,11 @@ const STUDENT_STEPS = [
     body: "Before you drop a course or add one that causes a clash, you'll see a confirmation listing exactly what changes. When the plan has no red alerts, submit it to Prof. Rossi here.",
   },
   {
+    target: 'a11y',
+    title: 'Display & accessibility',
+    body: 'Switch to dark mode, a colour-blind friendly palette with patterns, larger text, high contrast, reduced motion or a more readable font. Settings are saved on this device.',
+  },
+  {
     target: 'help',
     title: "You're all set",
     body: 'Tap Tour anytime to see this guide again, or ↻ to reset the demo data.',
@@ -142,6 +147,11 @@ const ADVISOR_STEPS = [
     body: 'Browse the catalogue, compare courses and read syllabi while advising. It is read-only in this workspace.',
   },
   {
+    target: 'a11y',
+    title: 'Display & accessibility',
+    body: 'Switch to dark mode, a colour-blind friendly palette with patterns, larger text, high contrast, reduced motion or a more readable font. Settings are saved on this device.',
+  },
+  {
     target: 'role',
     title: 'Switch workspace',
     body: 'Switch to the Student view to act as Alex (for example, to submit the plan), or to the Admin view. Tap Tour anytime to see this guide again.',
@@ -170,6 +180,11 @@ const ADMIN_STEPS = [
     tab: 'timetable',
     title: 'Department timetable',
     body: 'All courses on one week. Red zones show slots where two courses run at the same time, so you can spot clashes before students run into them.',
+  },
+  {
+    target: 'a11y',
+    title: 'Display & accessibility',
+    body: 'Switch to dark mode, a colour-blind friendly palette with patterns, larger text, high contrast, reduced motion or a more readable font. Settings are saved on this device.',
   },
   {
     target: 'role',
@@ -310,7 +325,7 @@ export function GuidedTour() {
           style={{ ...spot, boxShadow: '0 0 0 9999px rgba(15, 23, 42, 0.62)' }}
         />
       ) : (
-        <div className="absolute inset-0 bg-slate-900/60" />
+        <div className="absolute inset-0 bg-ink-900/60" />
       )}
 
       <div

@@ -24,7 +24,7 @@ export function CourseDataAdmin() {
         <LibrarianConsole />
       </div>
 
-      <section className="bg-white border border-slate-200 rounded-xl overflow-x-auto scrollbar-thin" data-tour="course-table" aria-label="Course records">
+      <section tabIndex={0} className="bg-white border border-slate-200 rounded-xl overflow-x-auto scrollbar-thin" data-tour="course-table" aria-label="Course records">
         <table className="w-full min-w-[880px] text-sm">
           <caption className="text-left px-4 pt-4 pb-2">
             <span className="font-semibold text-slate-900">Course records</span>
@@ -42,7 +42,7 @@ export function CourseDataAdmin() {
           <tbody>
             {catalog.map((c) => (
               <tr key={c.code} className="border-t border-slate-100 align-top">
-                <td className="px-3 py-2.5 font-mono text-xs text-slate-600">{c.code}</td>
+                <td className="px-3 py-2.5 font-mono text-xs text-slate-600 whitespace-nowrap">{c.code}</td>
                 <td className="px-3 py-2.5">
                   <p className="font-medium text-slate-900">{c.title}</p>
                   <p className="text-xs text-slate-500">{c.lecturer}</p>

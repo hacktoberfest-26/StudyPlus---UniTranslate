@@ -250,8 +250,8 @@ export const DAYS = ['Mon', 'Tue', 'Wed', 'Thu', 'Fri'];
 export const DAY_LABELS = { Mon: 'Monday', Tue: 'Tuesday', Wed: 'Wednesday', Thu: 'Thursday', Fri: 'Friday' };
 
 export const COURSE_TYPES = {
-  compulsory: { label: 'Compulsory', block: 'bg-blue-500', dot: 'bg-blue-500', chip: 'bg-blue-100 text-blue-700' },
-  elective: { label: 'Elective', block: 'bg-purple-500', dot: 'bg-purple-500', chip: 'bg-purple-100 text-purple-700' },
-  seminar: { label: 'Seminar', block: 'bg-emerald-500', dot: 'bg-emerald-500', chip: 'bg-emerald-100 text-emerald-700' },
-  thesis: { label: 'Thesis', block: 'bg-amber-500', dot: 'bg-amber-500', chip: 'bg-amber-100 text-amber-700' },
+  compulsory: { label: 'Compulsory', block: 'bg-blue-600', dot: 'bg-blue-600', chip: 'bg-blue-100 text-blue-700' },
+  elective: { label: 'Elective', block: 'bg-purple-600', dot: 'bg-purple-600', chip: 'bg-purple-100 text-purple-700' },
+  seminar: { label: 'Seminar', block: 'bg-emerald-700', dot: 'bg-emerald-700', chip: 'bg-emerald-100 text-emerald-700' },
+  thesis: { label: 'Thesis', block: 'bg-amber-700', dot: 'bg-amber-700', chip: 'bg-amber-100 text-amber-700' },
 };

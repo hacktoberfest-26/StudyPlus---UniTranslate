@@ -86,7 +86,7 @@ export function AdvisorChatbot({ onClose }) {
           </div>
         </div>
         <div className="flex items-center gap-2">
-          <span className="hidden sm:flex items-center gap-1 text-xs bg-green-500 px-2 py-1 rounded-full">
+          <span className="hidden sm:flex items-center gap-1 text-xs bg-green-700 px-2 py-1 rounded-full">
             <span className="w-2 h-2 bg-white rounded-full animate-pulse" /> Online
           </span>
           {onClose && (
@@ -226,7 +226,7 @@ export function ChatDrawer() {
           <span className="absolute -top-0.5 -right-0.5 w-4 h-4 bg-green-500 rounded-full border-2 border-white" />
         </button>
       )}
-      {chatOpen && <div className="fixed inset-0 bg-slate-900/30 z-40 sm:hidden" onClick={closeChat} aria-hidden />}
+      {chatOpen && <div className="fixed inset-0 bg-ink-900/40 z-40 sm:hidden" onClick={closeChat} aria-hidden />}
       <div
         className={`fixed right-0 top-0 h-full w-full sm:max-w-md shadow-2xl z-50 transition-transform duration-300 ${chatOpen ? 'translate-x-0' : 'translate-x-full'}`}
         aria-hidden={!chatOpen}

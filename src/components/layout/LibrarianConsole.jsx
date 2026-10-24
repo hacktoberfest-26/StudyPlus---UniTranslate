@@ -18,7 +18,7 @@ export function LibrarianConsole() {
   }, [catalog]);
 
   return (
-    <section className="bg-slate-900 text-slate-100 rounded-lg" aria-label="Librarian console">
+    <section className="bg-ink-900 text-ink-100 rounded-lg" aria-label="Librarian console">
       <button onClick={() => setOpen(!open)} aria-expanded={open} className="w-full flex items-center justify-between px-3 py-2 text-sm font-semibold">
         <span className="flex items-center gap-2">
           <Database className="w-4 h-4 text-cyan-300" aria-hidden /> 🏛️ Librarian Console — H-OS Brain data pipeline
@@ -34,32 +34,32 @@ export function LibrarianConsole() {
               ['Catalogue CFU', stats.cfu],
               ['Slot clashes', stats.clashes],
             ].map(([k, v]) => (
-              <div key={k} className="bg-slate-800 rounded-lg px-3 py-2">
-                <dt className="text-[10px] uppercase tracking-wide text-slate-400">{k}</dt>
+              <div key={k} className="bg-ink-800 rounded-lg px-3 py-2">
+                <dt className="text-[10px] uppercase tracking-wide text-ink-400">{k}</dt>
                 <dd className="text-lg font-bold">{v}</dd>
               </div>
             ))}
           </dl>
 
-          <div className="bg-slate-800 rounded-lg p-3 space-y-2 min-w-0">
+          <div className="bg-ink-800 rounded-lg p-3 space-y-2 min-w-0">
             <div className="flex flex-wrap items-center justify-between gap-2">
-              <p className="text-xs text-slate-300">
+              <p className="text-xs text-ink-300">
                 {RAW_SYLLABUS_FEED.length} unstructured records waiting in the ingestion queue (PDF scans & spreadsheet exports).
               </p>
               <button
                 onClick={runIngest}
                 disabled={!!report}
-                className="inline-flex items-center gap-1.5 bg-cyan-500 hover:bg-cyan-400 disabled:bg-slate-600 disabled:cursor-not-allowed text-slate-900 text-xs font-semibold px-3 py-1.5 rounded-lg"
+                className="inline-flex items-center gap-1.5 bg-cyan-500 hover:bg-cyan-400 disabled:bg-ink-600 disabled:cursor-not-allowed text-ink-900 text-xs font-semibold px-3 py-1.5 rounded-lg"
               >
                 <Sparkles className="w-3.5 h-3.5" aria-hidden /> {report ? 'Feed ingested' : 'Run Librarian Ingestion'}
               </button>
             </div>
             <ul className="space-y-1.5">
               {(report ?? RAW_SYLLABUS_FEED.map((r) => ({ source: r.source, pending: true, text: r.text }))).map((r) => (
-                <li key={r.source} className="text-xs bg-slate-900/60 rounded-md p-2">
+                <li key={r.source} className="text-xs bg-ink-900/60 rounded-md p-2">
                   <div className="flex items-center gap-2">
-                    <FileText className="w-3.5 h-3.5 text-slate-400 shrink-0" aria-hidden />
-                    <span className="font-mono text-slate-300 truncate">{r.source}</span>
+                    <FileText className="w-3.5 h-3.5 text-ink-400 shrink-0" aria-hidden />
+                    <span className="font-mono text-ink-300 truncate">{r.source}</span>
                     {!r.pending &&
                       (r.publishable ? (
                         <span className="ml-auto flex items-center gap-1 text-green-300 shrink-0">
@@ -72,10 +72,10 @@ export function LibrarianConsole() {
                       ))}
                   </div>
                   {r.pending ? (
-                    <p className="font-mono text-slate-500 mt-1 break-all">{r.text}</p>
+                    <p className="font-mono text-ink-400 mt-1 break-all">{r.text}</p>
                   ) : (
                     r.issues.length > 0 && (
-                      <ul className="mt-1 pl-5 list-disc text-slate-400">
+                      <ul className="mt-1 pl-5 list-disc text-ink-400">
                         {r.issues.map((i, idx) => (
                           <li key={idx} className={i.level === 'error' ? 'text-red-300' : ''}>
                             {i.level === 'error' ? 'Blocking' : 'Fixed'} · {i.message}

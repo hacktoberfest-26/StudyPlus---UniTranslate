@@ -46,6 +46,13 @@ npm run build    # production bundle in dist/
   - Dropping a course always asks first and lists the consequences: lost credits, a released confirmed seat, career skills lost, and new or resolved alerts.
   - Adding or swapping asks only when the change creates a clash, a missing prerequisite or a credit problem, or when it would reopen a plan that was already submitted.
 
+- **Display & accessibility** (the *Display* button in the header; saved per device and kept by *Reset demo*):
+  - *Theme*: System (follows the OS or host setting), Light or Dark.
+  - *Colour-blind friendly*: an Okabe–Ito palette that stays distinct with protanopia, deuteranopia and tritanopia, plus patterns on calendar blocks, legends and the progress bar so colour is never the only cue.
+  - *Text size* (100 / 112.5 / 125%), *High contrast*, *Reduce motion* and a *Readable font* (Atkinson Hyperlegible).
+  - Always on: a skip-to-content link, visible keyboard focus, labelled regions and controls, and type labels on calendar blocks. Every workspace passes an axe-core WCAG 2 A/AA audit in light, dark, colour-blind and high-contrast modes.
+  - Dark mode and the colour-blind palette work by re-pointing Tailwind's colour variables in `src/index.css`. The `ink` palette is for panels that stay dark in both themes.
+
 ## Project layout
 
 ```

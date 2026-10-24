@@ -68,7 +68,7 @@ function DecisionPanel({ critical }) {
             setNote('');
           }}
           disabled={!canApprove}
-          className="flex-1 inline-flex items-center justify-center gap-1.5 bg-emerald-600 hover:bg-emerald-700 disabled:bg-slate-300 disabled:cursor-not-allowed text-white text-sm font-medium px-3 py-2 rounded-lg"
+          className="flex-1 inline-flex items-center justify-center gap-1.5 bg-emerald-700 hover:bg-emerald-800 disabled:bg-slate-300 disabled:cursor-not-allowed text-white text-sm font-medium px-3 py-2 rounded-lg"
         >
           <Check className="w-4 h-4" aria-hidden /> {submission === 'approved' ? 'Approved' : 'Approve plan'}
         </button>
@@ -136,7 +136,7 @@ export function PlanReview() {
             </ul>
           </section>
 
-          <section className="bg-white border border-slate-200 rounded-xl overflow-x-auto scrollbar-thin" aria-label="Courses in the plan">
+          <section tabIndex={0} className="bg-white border border-slate-200 rounded-xl overflow-x-auto scrollbar-thin" aria-label="Courses in the plan">
             <table className="w-full min-w-[560px] text-sm">
               <caption className="text-left font-semibold text-slate-900 px-4 pt-4 pb-2">
                 Courses in the plan · {planCourses.length} courses, {total} CFU
@@ -172,7 +172,7 @@ export function PlanReview() {
             </table>
           </section>
 
-          <section aria-label="Alex's weekly timetable" className="overflow-x-auto scrollbar-thin">
+          <section aria-label="Alex's weekly timetable" className="overflow-x-auto scrollbar-thin" tabIndex={0}>
             <h3 className="font-semibold text-slate-900 mb-2">Weekly timetable</h3>
             <WeekGrid courses={planCourses} tourId="review-calendar" />
           </section>

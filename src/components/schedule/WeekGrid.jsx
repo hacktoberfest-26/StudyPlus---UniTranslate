@@ -64,16 +64,16 @@ function EventBlock({ ev, onRemove }) {
         className={`h-full rounded-lg p-2 text-xs overflow-hidden relative ${
           ghost
             ? 'ghost-block text-indigo-800'
-            : `${color} text-white shadow-sm ${status === 'draft' ? 'ring-2 ring-offset-1 ring-white/70 border-2 border-dashed border-white/60' : ''}`
+            : `${color} type-${course.type} text-white shadow-sm ${status === 'draft' ? 'ring-2 ring-offset-1 ring-white/70 border-2 border-dashed border-white/60' : ''}`
         }`}
       >
         <p className="font-semibold leading-tight pr-4">{course.title}</p>
-        <p className="opacity-90">{ev.room}</p>
-        <p className="opacity-80">
+        <p>{ev.room}</p>
+        <p>
           {CAMPUSES[course.campus]?.short} · {course.cfu} CFU
         </p>
-        <p className="opacity-80 font-medium">
-          {ghost ? '👻 Ghost preview' : status === 'draft' ? 'Draft' : status === 'confirmed' ? 'Confirmed' : course.code}
+        <p className="font-medium">
+          {ghost ? '👻 Ghost preview' : [COURSE_TYPES[course.type]?.label, status === 'draft' ? 'Draft' : status === 'confirmed' ? 'Confirmed' : course.code].join(' · ')}
         </p>
         {onRemove && !ghost && status === 'draft' && (
           <button
@@ -135,9 +135,10 @@ export function WeekGrid({ courses, ghost = null, onRemove, tourId, collisionLab
             className="relative border-l border-slate-200"
             style={{
               height: HOURS.length * HOUR_PX,
-              backgroundImage: `repeating-linear-gradient(to bottom, transparent 0, transparent ${HOUR_PX - 1}px, #e2e8f0 ${HOUR_PX - 1}px, #e2e8f0 ${HOUR_PX}px)`,
+              backgroundImage: `repeating-linear-gradient(to bottom, transparent 0, transparent ${HOUR_PX - 1}px, var(--grid-line) ${HOUR_PX - 1}px, var(--grid-line) ${HOUR_PX}px)`,
             }}
-            aria-label={`${dayLabel(day)}: ${events.map((e) => e.course.title).join(', ') || 'free'}`}
+            role="group"
+                  aria-label={`${dayLabel(day)}: ${events.map((e) => e.course.title).join(', ') || 'free'}`}
           >
             {events.map((ev) => (
               <EventBlock key={ev.key} ev={ev} onRemove={onRemove} />

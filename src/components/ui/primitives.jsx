@@ -53,7 +53,7 @@ export function Modal({ title, onClose, children, wide = false }) {
   }, [onClose]);
 
   return (
-    <div className="fixed inset-0 z-50 flex items-end sm:items-center justify-center bg-slate-900/50 p-0 sm:p-4" onClick={onClose}>
+    <div className="fixed inset-0 z-50 flex items-end sm:items-center justify-center bg-ink-900/60 p-0 sm:p-4" onClick={onClose}>
       <div
         ref={ref}
         data-modal

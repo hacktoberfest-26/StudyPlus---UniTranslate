@@ -20,7 +20,7 @@ export const ROLE_TABS = {
   ],
 };
 
-const ACTIVE_STYLE = { student: 'bg-blue-600', advisor: 'bg-emerald-600', admin: 'bg-slate-800' };
+const ACTIVE_STYLE = { student: 'bg-blue-600', advisor: 'bg-emerald-700', admin: 'bg-ink-800' };
 
 /** The tab to render: falls back to the role's first view if the stored tab belongs to another role. */
 export function useActiveTab() {
@@ -56,7 +56,7 @@ export function TabNav() {
               role="tab"
               id={`tab-${id}`}
               aria-selected={active}
-              aria-controls={`view-${id}`}
+              aria-controls={active ? 'main-content' : undefined}
               tabIndex={active ? 0 : -1}
               onClick={() => setTab(id)}
               className={`flex items-center gap-2 px-3 sm:px-4 py-2 rounded-lg text-sm font-medium transition-colors focus:outline-none focus:ring-2 focus:ring-blue-500 ${
