@@ -1,0 +1,57 @@
+@import "tailwindcss";
+
+@theme {
+  --font-sans: "Inter", ui-sans-serif, system-ui, sans-serif;
+}
+
+.scrollbar-thin::-webkit-scrollbar { width: 6px; height: 6px; }
+.scrollbar-thin::-webkit-scrollbar-track { background: #f1f5f9; }
+.scrollbar-thin::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 3px; }
+.scrollbar-thin::-webkit-scrollbar-thumb:hover { background: #94a3b8; }
+
+/* Ghost preview block on the calendar */
+.ghost-block {
+  background: repeating-linear-gradient(
+    45deg,
+    rgba(99, 102, 241, 0.12),
+    rgba(99, 102, 241, 0.12) 10px,
+    rgba(99, 102, 241, 0.24) 10px,
+    rgba(99, 102, 241, 0.24) 20px
+  );
+  border: 2px dashed rgba(79, 70, 229, 0.7);
+}
+
+/* Draft-credit segments on the progress bar */
+.striped {
+  background-image: repeating-linear-gradient(
+    45deg,
+    rgba(255, 255, 255, 0.45),
+    rgba(255, 255, 255, 0.45) 4px,
+    transparent 4px,
+    transparent 8px
+  );
+}
+
+.collision-flash { animation: flash-red 1s ease-in-out infinite; }
+@keyframes flash-red {
+  0%, 100% { background-color: rgba(239, 68, 68, 0.35); }
+  50% { background-color: rgba(239, 68, 68, 0.7); }
+}
+
+.view-enter { animation: view-in 0.25s ease-out; }
+@keyframes view-in {
+  from { opacity: 0; transform: translateY(6px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+.typing-dot { animation: typing 1.4s infinite; }
+.typing-dot:nth-child(2) { animation-delay: 0.2s; }
+.typing-dot:nth-child(3) { animation-delay: 0.4s; }
+@keyframes typing {
+  0%, 60%, 100% { transform: translateY(0); }
+  30% { transform: translateY(-5px); }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .collision-flash, .view-enter, .typing-dot, .animate-pulse { animation: none !important; }
+}
