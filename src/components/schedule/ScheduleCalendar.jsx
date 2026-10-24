@@ -32,7 +32,7 @@ export function ScheduleCalendar() {
   const totalCfu = shown.reduce((s, c) => s + c.cfu, 0);
 
   return (
-    <div className="flex flex-col min-h-0 h-full">
+    <div className="flex flex-col">
       <div className="bg-white border-b border-slate-200 p-4 flex flex-col xl:flex-row xl:items-center justify-between gap-3">
         <div className="flex flex-wrap items-center gap-3">
           <h2 className="text-lg font-semibold text-slate-900">Weekly Timetable</h2>
@@ -94,17 +94,17 @@ export function ScheduleCalendar() {
         </div>
       )}
 
-      <div className="flex-1 min-h-0 overflow-auto scrollbar-thin p-4 flex flex-col xl:flex-row gap-4">
+      <div className="p-4 flex flex-col xl:flex-row xl:items-start gap-4">
         <div className="flex-1 overflow-x-auto scrollbar-thin" tabIndex={0} role="region" aria-label="Weekly timetable">
           <WeekGrid courses={shown} ghost={ghost} onRemove={removeCourse} tourId="calendar" />
         </div>
 
-        <aside className="xl:w-64 shrink-0 bg-white border border-slate-200 rounded-xl p-3 self-start w-full" aria-label="Ghost preview picker" data-tour="ghost-picker">
+        <aside className="xl:w-64 shrink-0 bg-white border border-slate-200 rounded-xl p-3 self-start w-full xl:sticky xl:top-[calc(var(--sticky-top)+1rem)]" aria-label="Ghost preview picker" data-tour="ghost-picker">
           <h3 className="text-sm font-semibold text-slate-900">👻 Ghost Preview</h3>
           {isDraft ? (
             <>
               <p className="text-xs text-slate-500 mb-2">Hover a course to overlay it on your week; click to pin it.</p>
-              <ul className="space-y-1 max-h-72 xl:max-h-[480px] overflow-y-auto scrollbar-thin" onMouseLeave={() => setHoverGhost(null)}>
+              <ul className="space-y-1" onMouseLeave={() => setHoverGhost(null)}>
                 {pickable.map((c) => {
                   const clash = conflictsWith(c, planCourses).length > 0;
                   return (

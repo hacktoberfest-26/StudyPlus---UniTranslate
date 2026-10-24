@@ -29,7 +29,7 @@ const STUDENT_STEPS = [
   {
     target: 'alerts',
     title: 'Alerts that watch your plan',
-    body: 'Agents check your plan after every change. A red overlap alert cannot be dismissed. It disappears only when you fix the clash, for example with ⚡ Apply Smart Recommendation. Yellow alerts flag missing prerequisites or credits.',
+    body: 'Agents check your plan after every change. A red overlap alert cannot be dismissed. It disappears only when you fix the clash, for example with ⚡ Apply Smart Recommendation. Yellow alerts flag missing prerequisites or credits. On wide screens this panel stays in view as you scroll, and you can drag its edge to make it wider.',
   },
   {
     target: 'tabs',
@@ -60,7 +60,7 @@ const STUDENT_STEPS = [
     tab: 'schedule',
     scheduleMode: 'draft',
     title: 'Your week at a glance',
-    body: 'Blue is compulsory, purple elective, green seminar. When two classes overlap, the clash flashes red with "🔥 Schedule Collision!".',
+    body: 'Blue is compulsory, purple elective, green seminar. When two classes overlap, the clash flashes red with "🔥 Schedule Collision!". Use Calendar zoom above the grid to make the hours taller or shorter.',
   },
   {
     target: 'ghost-picker',
@@ -173,7 +173,7 @@ const ADMIN_STEPS = [
     target: 'course-table',
     tab: 'courses',
     title: 'Course records',
-    body: 'Every course with its schedule, room, prerequisites and source. Courses that share a time slot with another course are flagged.',
+    body: 'Every course with its schedule, room, prerequisites and source. Courses that share a time slot with another course are flagged. Drag the edge of any column header to resize it.',
   },
   {
     target: 'dept-timetable',

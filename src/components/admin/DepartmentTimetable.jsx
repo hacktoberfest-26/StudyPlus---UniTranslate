@@ -13,7 +13,7 @@ export function DepartmentTimetable() {
   const clashes = useMemo(() => findConflicts(courses), [courses]);
 
   return (
-    <div className="flex-1 min-h-0 overflow-y-auto scrollbar-thin">
+    <div>
       <div className="bg-white border-b border-slate-200 p-4 sm:px-6 flex flex-col lg:flex-row lg:items-center justify-between gap-3">
         <div>
           <h2 className="text-lg font-semibold text-slate-900">Department Timetable</h2>

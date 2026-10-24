@@ -1,4 +1,4 @@
-import { useEffect } from 'react';
+import { useEffect, useRef } from 'react';
 import { usePlanStore } from './store/usePlanStore.js';
 import { useAlerts } from './store/derived.js';
 import { Header } from './components/layout/Header.jsx';
@@ -45,7 +45,7 @@ function MobileCriticalStrip() {
   const swap = first.actions.find((a) => a.kind === 'swap');
 
   return (
-    <div className="lg:hidden sticky top-0 z-30 bg-red-600 text-white px-4 py-2 flex items-center gap-3 shadow" role="alert">
+    <div className="lg:hidden bg-red-600 text-white px-4 py-2 flex items-center gap-3" role="alert">
       <p className="text-xs font-medium flex-1">
         🚨 {critical.length} timetable overlap{critical.length > 1 ? 's' : ''}: {first.message}
       </p>
@@ -72,6 +72,19 @@ function Toasts() {
   );
 }
 
+/** Publishes the sticky bar's height as --sticky-top so the alerts panel can stick just below it. */
+function useStickyOffset() {
+  const ref = useRef(null);
+  useEffect(() => {
+    const el = ref.current;
+    if (!el) return undefined;
+    const ro = new ResizeObserver(() => document.documentElement.style.setProperty('--sticky-top', `${el.offsetHeight}px`));
+    ro.observe(el);
+    return () => ro.disconnect();
+  }, []);
+  return ref;
+}
+
 export default function App() {
   useApplyDisplayPrefs();
   const role = usePlanStore((s) => s.role);
@@ -80,6 +93,7 @@ export default function App() {
   const isStudent = role === 'student';
   const tourSeen = usePlanStore((s) => !!s.toursDone[s.role]);
   const startTour = usePlanStore((s) => s.startTour);
+  const stickyRef = useStickyOffset();
 
   // First visit to a workspace: open its guided tour (it can be skipped on the first card).
   useEffect(() => {
@@ -87,19 +101,23 @@ export default function App() {
   }, []); // eslint-disable-line react-hooks/exhaustive-deps
 
   return (
-    <div className="min-h-screen lg:h-screen flex flex-col bg-slate-50 font-sans text-slate-900">
+    <div className="min-h-screen flex flex-col bg-slate-50 font-sans text-slate-900">
       <a href="#main-content" className="skip-link">
         Skip to main content
       </a>
-      {isStudent && <MobileCriticalStrip />}
-      <header className="bg-white border-b border-slate-200 shrink-0">
+      <header className="bg-white">
         <Header />
         {isStudent && <DegreeProgress />}
         {isStudent ? <RoleContextBar /> : <div className="h-3" />}
-        <TabNav />
       </header>
 
-      <div className="flex-1 min-h-0 flex flex-col lg:flex-row">
+      {/* The page scrolls as a whole; the tabs (and any critical alert on small screens) stay pinned. */}
+      <div ref={stickyRef} className="sticky top-0 z-30 bg-white/95 backdrop-blur border-b border-slate-200 shadow-sm">
+        {isStudent && <MobileCriticalStrip />}
+        <TabNav />
+      </div>
+
+      <div className="flex-1 flex flex-col lg:flex-row lg:items-start">
         {isStudent && <ProactiveAlerts />}
         <main
           key={activeTab}
@@ -107,10 +125,10 @@ export default function App() {
           id="main-content"
           role="tabpanel"
           aria-labelledby={`tab-${activeTab}`}
-          className={`view-enter flex-1 min-w-0 min-h-[70vh] lg:min-h-0 flex flex-col ${activeTab === 'advisor' ? 'p-0 sm:p-4' : ''}`}
+          className={`view-enter flex-1 min-w-0 flex flex-col ${activeTab === 'advisor' ? 'p-0 sm:p-4' : ''}`}
         >
           {activeTab === 'advisor' ? (
-            <div className="flex-1 min-h-[70vh] lg:min-h-0 sm:rounded-xl overflow-hidden border border-slate-200 max-w-3xl w-full mx-auto flex flex-col">
+            <div className="h-[calc(100vh-var(--sticky-top,56px)-2rem)] min-h-[32rem] sm:rounded-xl overflow-hidden border border-slate-200 max-w-3xl w-full mx-auto flex flex-col">
               <View />
             </div>
           ) : (

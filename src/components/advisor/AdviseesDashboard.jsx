@@ -2,6 +2,9 @@ import { ArrowRight } from 'lucide-react';
 import { usePlanStore } from '../../store/usePlanStore.js';
 import { useAlerts, usePlanSummary } from '../../store/derived.js';
 import { STUDENT, SAMPLE_ADVISEES } from '../../brain/student.js';
+import { useColumnWidths, ResizableTh, ResetColumnsButton } from '../ui/resize.jsx';
+
+const ADVISEE_COLUMNS = { student: 210, completed: 120, semester: 140, findings: 190, status: 170, action: 140 };
 
 export const STATUS_PILLS = {
   draft: { label: 'Draft in progress', className: 'bg-slate-100 text-slate-700' },
@@ -30,9 +33,10 @@ export function AdviseesDashboard() {
   };
   const advisees = [alex, ...SAMPLE_ADVISEES];
   const count = (status) => advisees.filter((a) => a.status === status).length;
+  const cols = useColumnWidths('advisees', ADVISEE_COLUMNS);
 
   return (
-    <div className="flex-1 min-h-0 overflow-y-auto scrollbar-thin p-4 sm:p-6 space-y-5">
+    <div className="p-4 sm:p-6 space-y-5">
       <div>
         <h2 className="text-lg font-semibold text-slate-900">My Advisees</h2>
         <p className="text-sm text-slate-600">Study plans of the students you supervise this semester. Open a plan to review and approve it.</p>
@@ -53,15 +57,15 @@ export function AdviseesDashboard() {
       </dl>
 
       <div className="bg-white border border-slate-200 rounded-xl overflow-x-auto scrollbar-thin" data-tour="advisees">
-        <table className="w-full min-w-[640px] text-sm">
+        <table className="table-fixed text-sm [&_td]:break-words" style={{ width: cols.total, minWidth: '100%' }}>
           <thead className="bg-slate-50 text-xs uppercase tracking-wide text-slate-500">
             <tr>
-              <th scope="col" className="text-left font-medium px-4 py-2.5">Student</th>
-              <th scope="col" className="text-left font-medium px-4 py-2.5">Completed</th>
-              <th scope="col" className="text-left font-medium px-4 py-2.5">This semester</th>
-              <th scope="col" className="text-left font-medium px-4 py-2.5">Agent findings</th>
-              <th scope="col" className="text-left font-medium px-4 py-2.5">Status</th>
-              <th scope="col" className="px-4 py-2.5">
+              <ResizableTh id="student" label="Student" cols={cols} className="text-left px-4" />
+              <ResizableTh id="completed" label="Completed" cols={cols} className="text-left px-4" />
+              <ResizableTh id="semester" label="This semester" cols={cols} className="text-left px-4" />
+              <ResizableTh id="findings" label="Agent findings" cols={cols} className="text-left px-4" />
+              <ResizableTh id="status" label="Status" cols={cols} className="text-left px-4" />
+              <th scope="col" className="px-4 py-2.5" style={{ width: cols.widths.action }}>
                 <span className="sr-only">Action</span>
               </th>
             </tr>
@@ -103,7 +107,8 @@ export function AdviseesDashboard() {
         </table>
       </div>
       <p className="text-xs text-slate-500">
-        Alex's row is live: it updates as soon as Alex changes the plan in the Student view. The other rows are sample records for the demo.
+        Drag the edge of a column header to resize it. Alex's row is live: it updates as soon as Alex changes the plan in the Student view. The other rows are sample records for the demo.{' '}
+        <ResetColumnsButton cols={cols} />
       </p>
     </div>
   );

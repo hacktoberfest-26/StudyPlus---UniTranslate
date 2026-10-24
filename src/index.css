@@ -83,6 +83,7 @@
   --focus: #2563eb;
 }
 
+html { scroll-behavior: smooth; scroll-padding-top: calc(var(--sticky-top, 56px) + 1rem); }
 body { background: var(--page); }
 
 /* Visible keyboard focus everywhere, including elements without their own ring. */

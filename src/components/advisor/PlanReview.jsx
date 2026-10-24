@@ -10,6 +10,9 @@ import { AlertCard } from '../alerts/ProactiveAlerts.jsx';
 import { WeekGrid } from '../schedule/WeekGrid.jsx';
 import { TypeChip } from '../ui/primitives.jsx';
 import { STATUS_PILLS } from './AdviseesDashboard.jsx';
+import { useColumnWidths, ResizableTh, ResetColumnsButton } from '../ui/resize.jsx';
+
+const PLAN_COLUMNS = { course: 260, type: 130, schedule: 190, cfu: 80, status: 120 };
 
 const LOG_LABELS = {
   submitted: 'Alex submitted the plan',
@@ -102,10 +105,11 @@ export function PlanReview() {
   const { planCourses, total, conflictCodes } = usePlanSummary();
   const findings = alerts.filter((a) => a.severity !== 'success' || a.id === 'all-clear');
   const critical = alerts.filter((a) => a.severity === 'critical').length;
+  const cols = useColumnWidths('plan-review', PLAN_COLUMNS);
   const goals = STUDENT.careerGoals.map((id) => CAREERS.find((c) => c.id === id)?.label).join(', ');
 
   return (
-    <div className="flex-1 min-h-0 overflow-y-auto scrollbar-thin">
+    <div>
       <div className="bg-white border-b border-slate-200 p-4 sm:px-6 flex flex-wrap items-center justify-between gap-3">
         <div>
           <h2 className="text-lg font-semibold text-slate-900">Plan Review: Alex</h2>
@@ -137,17 +141,17 @@ export function PlanReview() {
           </section>
 
           <section tabIndex={0} className="bg-white border border-slate-200 rounded-xl overflow-x-auto scrollbar-thin" aria-label="Courses in the plan">
-            <table className="w-full min-w-[560px] text-sm">
+            <table className="table-fixed text-sm [&_td]:break-words" style={{ width: cols.total, minWidth: '100%' }}>
               <caption className="text-left font-semibold text-slate-900 px-4 pt-4 pb-2">
-                Courses in the plan · {planCourses.length} courses, {total} CFU
+                Courses in the plan · {planCourses.length} courses, {total} CFU <ResetColumnsButton cols={cols} />
               </caption>
               <thead className="bg-slate-50 text-xs uppercase tracking-wide text-slate-500">
                 <tr>
-                  <th scope="col" className="text-left font-medium px-4 py-2">Course</th>
-                  <th scope="col" className="text-left font-medium px-4 py-2">Type</th>
-                  <th scope="col" className="text-left font-medium px-4 py-2">Schedule</th>
-                  <th scope="col" className="text-right font-medium px-4 py-2">CFU</th>
-                  <th scope="col" className="text-left font-medium px-4 py-2">Status</th>
+                  <ResizableTh id="course" label="Course" cols={cols} className="text-left px-4" />
+                  <ResizableTh id="type" label="Type" cols={cols} className="text-left px-4" />
+                  <ResizableTh id="schedule" label="Schedule" cols={cols} className="text-left px-4" />
+                  <ResizableTh id="cfu" label="CFU" cols={cols} className="text-right px-4" />
+                  <ResizableTh id="status" label="Status" cols={cols} className="text-left px-4" />
                 </tr>
               </thead>
               <tbody>
@@ -178,7 +182,7 @@ export function PlanReview() {
           </section>
         </div>
 
-        <div className="xl:sticky xl:top-4 self-start">
+        <div className="xl:sticky xl:top-[calc(var(--sticky-top)+1rem)] self-start">
           <DecisionPanel critical={critical} />
         </div>
       </div>

@@ -46,7 +46,7 @@ export function TabNav() {
   };
 
   return (
-    <nav data-tour="tabs" className="px-4 sm:px-6 pb-3 overflow-x-auto scrollbar-thin">
+    <nav data-tour="tabs" className="px-4 sm:px-6 py-2 overflow-x-auto scrollbar-thin">
       <div role="tablist" aria-label="H-OS views" className="flex gap-2 min-w-max" onKeyDown={onKeyDown}>
         {TABS.map(({ id, label, short, icon: Icon }) => {
           const active = activeTab === id;

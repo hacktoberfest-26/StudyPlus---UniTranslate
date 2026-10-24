@@ -38,7 +38,7 @@ export function CourseCatalogue() {
   const hasFilters = query || campus || format || cfu || days.length;
 
   return (
-    <div className="flex flex-col min-h-0 h-full">
+    <div className="flex flex-col">
       <div data-tour="catalog-filters" className="bg-white border-b border-slate-200 p-4 space-y-3">
         <div className="flex flex-col md:flex-row gap-3">
           <label className="relative flex-1 min-w-0">
@@ -118,7 +118,7 @@ export function CourseCatalogue() {
           Read-only reference. Clash and prerequisite badges show how each course fits Alex's current plan. Only Alex can add or drop courses.
         </p>
       )}
-      <div className="flex-1 overflow-y-auto scrollbar-thin p-4 sm:p-6">
+      <div className="p-4 sm:p-6">
         {filtered.length ? (
           <div className="grid grid-cols-1 md:grid-cols-2 2xl:grid-cols-3 gap-4">
             {filtered.map((course) => (

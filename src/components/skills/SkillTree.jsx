@@ -6,6 +6,8 @@ import { SKILL_NODES, SKILL_BY_ID, CAREERS } from '../../brain/skillGraph.js';
 import { STUDENT } from '../../brain/student.js';
 import { ancestorsOf, prerequisitesMet } from '../../agents/planning.js';
 import { conflictsWith, formatSchedule } from '../../librarian/schedule.js';
+import { usePrefsStore } from '../../store/usePrefsStore.js';
+import { ZoomControl } from '../ui/resize.jsx';
 import { CAMPUSES } from '../../brain/courses.js';
 
 const MIN_W = 1000;
@@ -133,15 +135,15 @@ function rowPositions(items, width, W) {
 /** Canvas width follows the container so the graph fits without clipping (scrolls below MIN_W). */
 function useCanvasWidth() {
   const ref = useRef(null);
-  const [width, setWidth] = useState(MIN_W);
+  const [available, setAvailable] = useState(MIN_W);
   useEffect(() => {
     const el = ref.current;
     if (!el) return undefined;
-    const ro = new ResizeObserver(([entry]) => setWidth(Math.max(MIN_W, Math.floor(entry.contentRect.width))));
+    const ro = new ResizeObserver(([entry]) => setAvailable(Math.floor(entry.contentRect.width)));
     ro.observe(el);
     return () => ro.disconnect();
   }, []);
-  return [ref, width];
+  return [ref, Math.max(MIN_W, available), available];
 }
 
 export function SkillTree() {
@@ -150,7 +152,11 @@ export function SkillTree() {
   const addMany = usePlanStore((s) => s.addMany);
   const askTutor = usePlanStore((s) => s.askTutor);
   const [selected, setSelected] = useState('ai-data-analyst');
-  const [canvasRef, W] = useCanvasWidth();
+  const [canvasRef, W, available] = useCanvasWidth();
+  const treeZoom = usePrefsStore((s) => s.treeZoom);
+  const setPref = usePrefsStore((s) => s.setPref);
+  // "Fit" shrinks the tree to the screen width (e.g. iPad portrait); otherwise use the chosen zoom.
+  const scale = treeZoom === 'fit' ? Math.min(1, available / W) : treeZoom;
 
   useEffect(() => {
     const onKey = (e) => {
@@ -226,7 +232,7 @@ export function SkillTree() {
     );
 
   return (
-    <div className="flex flex-col min-h-0 h-full">
+    <div className="flex flex-col">
       <div className="bg-white border-b border-slate-200 p-4 flex flex-col md:flex-row md:items-center justify-between gap-2">
         <div>
           <h2 className="text-lg font-semibold text-slate-900">Skill Tree & Career Pathways</h2>
@@ -241,10 +247,28 @@ export function SkillTree() {
         </div>
       </div>
 
-      <div className="flex-1 min-h-0 overflow-auto scrollbar-thin p-4 space-y-4">
-        <div ref={canvasRef} data-tour="skill-tree" className="overflow-x-auto scrollbar-thin bg-white border border-slate-200 rounded-xl">
+      <div className="p-4 space-y-4">
+        <div className="flex justify-end">
+          <ZoomControl
+            id="tree-zoom"
+            label="Zoom"
+            value={+scale.toFixed(2)}
+            min={0.5}
+            max={1.5}
+            step={0.1}
+            onChange={(v) => setPref('treeZoom', v)}
+            onReset={treeZoom === 'fit' ? undefined : () => setPref('treeZoom', 'fit')}
+            resetLabel="Fit to screen"
+          />
+        </div>
+        <div ref={canvasRef} data-tour="skill-tree" className="overflow-auto scrollbar-thin bg-white border border-slate-200 rounded-xl">
+          <div className="relative mx-auto" style={{ width: W * scale, height: H * scale }}>
           {/* Tapping empty canvas space closes the course card. */}
-          <div className="relative mx-auto" style={{ width: W, height: H }} onClick={(e) => e.target === e.currentTarget && setSelected(null)}>
+          <div
+            className="absolute top-0 left-0 origin-top-left"
+            style={{ width: W, height: H, transform: `scale(${scale})` }}
+            onClick={(e) => e.target === e.currentTarget && setSelected(null)}
+          >
             {[1, 2, 3, 4].map((t) => (
               <p key={t} className="absolute left-3 z-10 bg-white/90 px-1 rounded text-[11px] font-semibold uppercase tracking-wide text-slate-400" style={{ top: TIER_Y[t] - 24 }}>
                 {TIER_TITLES[t]}
@@ -333,6 +357,7 @@ export function SkillTree() {
                 onClose={() => setSelected(null)}
               />
             )}
+          </div>
           </div>
         </div>
 

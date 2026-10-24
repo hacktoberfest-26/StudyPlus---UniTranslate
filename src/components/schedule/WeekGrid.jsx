@@ -3,13 +3,15 @@
  * Overlapping sessions sit side by side and their shared window flashes red.
  */
 import { useMemo } from 'react';
+import { usePrefsStore } from '../../store/usePrefsStore.js';
+import { ZoomControl } from '../ui/resize.jsx';
 import { X } from 'lucide-react';
 import { DAYS, CAMPUSES, COURSE_TYPES } from '../../brain/courses.js';
 import { dayLabel, formatHour, sessionsOverlap, overlapWindow } from '../../librarian/schedule.js';
 
 const START_HOUR = 8;
 const END_HOUR = 18;
-const HOUR_PX = 60;
+const DEFAULT_HOUR_PX = 60;
 const HOURS = Array.from({ length: END_HOUR - START_HOUR }, (_, i) => START_HOUR + i);
 
 /** Places overlapping events side by side: returns events with `lane` and `lanes`. */
@@ -51,10 +53,11 @@ function collisionZones(events) {
   return zones;
 }
 
-function EventBlock({ ev, onRemove }) {
+function EventBlock({ ev, onRemove, hourPx }) {
   const { course, ghost, status } = ev;
-  const top = (ev.start - START_HOUR) * HOUR_PX;
-  const height = (ev.end - ev.start) * HOUR_PX;
+  const top = (ev.start - START_HOUR) * hourPx;
+  const height = (ev.end - ev.start) * hourPx;
+  const compact = height < 90; // zoomed out: keep title and type, drop room and campus
   const width = 100 / ev.lanes;
   const color = COURSE_TYPES[course.type]?.block ?? 'bg-slate-500';
 
@@ -68,12 +71,16 @@ function EventBlock({ ev, onRemove }) {
         }`}
       >
         <p className="font-semibold leading-tight pr-4">{course.title}</p>
-        <p>{ev.room}</p>
-        <p>
-          {CAMPUSES[course.campus]?.short} · {course.cfu} CFU
-        </p>
+        {!compact && <p>{ev.room}</p>}
+        {!compact && (
+          <p>
+            {CAMPUSES[course.campus]?.short} · {course.cfu} CFU
+          </p>
+        )}
         <p className="font-medium">
-          {ghost ? '👻 Ghost preview' : [COURSE_TYPES[course.type]?.label, status === 'draft' ? 'Draft' : status === 'confirmed' ? 'Confirmed' : course.code].join(' · ')}
+          {ghost
+            ? '👻 Ghost preview'
+            : [COURSE_TYPES[course.type]?.label, status === 'draft' ? 'Draft' : status === 'confirmed' ? 'Confirmed' : course.code].join(' · ')}
         </p>
         {onRemove && !ghost && status === 'draft' && (
           <button
@@ -95,6 +102,8 @@ function EventBlock({ ev, onRemove }) {
  * @param onRemove optional; shows a remove button on draft blocks
  */
 export function WeekGrid({ courses, ghost = null, onRemove, tourId, collisionLabel = '🔥 Schedule Collision!' }) {
+  const hourPx = usePrefsStore((s) => s.hourPx);
+  const setPref = usePrefsStore((s) => s.setPref);
   const days = useMemo(() => {
     const events = [
       ...courses.flatMap((course) => course.sessions.map((s, i) => ({ key: `${course.code}-${i}`, course, status: course.status, ...s }))),
@@ -107,55 +116,69 @@ export function WeekGrid({ courses, ghost = null, onRemove, tourId, collisionLab
   }, [courses, ghost]);
 
   return (
-    <div data-tour={tourId} className="min-w-[720px] bg-white border border-slate-200 rounded-xl overflow-hidden">
-      <div className="grid grid-cols-[56px_repeat(5,1fr)] border-b border-slate-200 bg-slate-50">
-        <div />
-        {DAYS.map((d) => (
-          <div key={d} className="p-2 text-center text-sm font-semibold text-slate-700 border-l border-slate-200">
-            {dayLabel(d)}
-          </div>
-        ))}
+    <>
+      <div className="flex justify-end mb-2">
+        <ZoomControl
+          label="Calendar zoom"
+          value={hourPx}
+          min={36}
+          max={120}
+          step={8}
+          format={(v) => `${Math.round((v / DEFAULT_HOUR_PX) * 100)}%`}
+          onChange={(v) => setPref('hourPx', v)}
+          onReset={hourPx !== DEFAULT_HOUR_PX ? () => setPref('hourPx', DEFAULT_HOUR_PX) : undefined}
+        />
       </div>
-      <div className="grid grid-cols-[56px_repeat(5,1fr)]">
-        <div className="relative" style={{ height: HOURS.length * HOUR_PX }}>
-          {HOURS.map((h) => (
-            <div
-              key={h}
-              className="absolute w-full text-right pr-2 text-xs text-slate-400 -translate-y-1/2"
-              style={{ top: (h - START_HOUR) * HOUR_PX }}
-            >
-              {h === START_HOUR ? '' : formatHour(h)}
+      <div data-tour={tourId} className="min-w-[720px] bg-white border border-slate-200 rounded-xl overflow-hidden">
+        <div className="grid grid-cols-[56px_repeat(5,1fr)] border-b border-slate-200 bg-slate-50">
+          <div />
+          {DAYS.map((d) => (
+            <div key={d} className="p-2 text-center text-sm font-semibold text-slate-700 border-l border-slate-200">
+              {dayLabel(d)}
             </div>
           ))}
-          <div className="absolute w-full text-right pr-2 text-xs text-slate-400 top-1">{formatHour(START_HOUR)}</div>
         </div>
-        {days.map(({ day, events, zones }) => (
-          <div
-            key={day}
-            className="relative border-l border-slate-200"
-            style={{
-              height: HOURS.length * HOUR_PX,
-              backgroundImage: `repeating-linear-gradient(to bottom, transparent 0, transparent ${HOUR_PX - 1}px, var(--grid-line) ${HOUR_PX - 1}px, var(--grid-line) ${HOUR_PX}px)`,
-            }}
-            role="group"
-                  aria-label={`${dayLabel(day)}: ${events.map((e) => e.course.title).join(', ') || 'free'}`}
-          >
-            {events.map((ev) => (
-              <EventBlock key={ev.key} ev={ev} onRemove={onRemove} />
-            ))}
-            {zones.map((z) => (
+        <div className="grid grid-cols-[56px_repeat(5,1fr)]">
+          <div className="relative" style={{ height: HOURS.length * hourPx }}>
+            {HOURS.map((h) => (
               <div
-                key={`${z.start}-${z.end}`}
-                className="collision-flash absolute inset-x-0 z-20 pointer-events-none flex items-end justify-center rounded-md border-2 border-red-600"
-                style={{ top: (z.start - START_HOUR) * HOUR_PX, height: (z.end - z.start) * HOUR_PX }}
-                role="alert"
+                key={h}
+                className="absolute w-full text-right pr-2 text-xs text-slate-400 -translate-y-1/2"
+                style={{ top: (h - START_HOUR) * hourPx }}
               >
-                <span className="mb-1 bg-red-600 text-white text-[11px] font-bold px-2 py-0.5 rounded-full shadow">{collisionLabel}</span>
+                {h === START_HOUR ? '' : formatHour(h)}
               </div>
             ))}
+            <div className="absolute w-full text-right pr-2 text-xs text-slate-400 top-1">{formatHour(START_HOUR)}</div>
           </div>
-        ))}
+          {days.map(({ day, events, zones }) => (
+            <div
+              key={day}
+              className="relative border-l border-slate-200"
+              style={{
+                height: HOURS.length * hourPx,
+                backgroundImage: `repeating-linear-gradient(to bottom, transparent 0, transparent ${hourPx - 1}px, var(--grid-line) ${hourPx - 1}px, var(--grid-line) ${hourPx}px)`,
+              }}
+              role="group"
+              aria-label={`${dayLabel(day)}: ${events.map((e) => e.course.title).join(', ') || 'free'}`}
+            >
+              {events.map((ev) => (
+                <EventBlock key={ev.key} ev={ev} onRemove={onRemove} hourPx={hourPx} />
+              ))}
+              {zones.map((z) => (
+                <div
+                  key={`${z.start}-${z.end}`}
+                  className="collision-flash absolute inset-x-0 z-20 pointer-events-none flex items-end justify-center rounded-md border-2 border-red-600"
+                  style={{ top: (z.start - START_HOUR) * hourPx, height: (z.end - z.start) * hourPx }}
+                  role="alert"
+                >
+                  <span className="mb-1 bg-red-600 text-white text-[11px] font-bold px-2 py-0.5 rounded-full shadow">{collisionLabel}</span>
+                </div>
+              ))}
+            </div>
+          ))}
+        </div>
       </div>
-    </div>
+    </>
   );
 }

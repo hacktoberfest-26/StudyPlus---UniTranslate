@@ -53,6 +53,14 @@ npm run build    # production bundle in dist/
   - Always on: a skip-to-content link, visible keyboard focus, labelled regions and controls, and type labels on calendar blocks. Every workspace passes an axe-core WCAG 2 A/AA audit in light, dark, colour-blind and high-contrast modes.
   - Dark mode and the colour-blind palette work by re-pointing Tailwind's colour variables in `src/index.css`. The `ink` palette is for panels that stay dark in both themes.
 
+- **Fluid layout**: the whole page scrolls naturally. The tab bar stays pinned at the top, and on wide screens the alert panel sticks beside the content. You can resize:
+  - the alert panel, by dragging its edge;
+  - columns in every data table, by dragging header edges, using ← → on a focused handle, or double-clicking to reset;
+  - the calendar, with a zoom control;
+  - the skill tree, with zoom or *Fit to screen*.
+
+  Sizes are remembered on the device. Handles work with mouse, touch (iPad) and keyboard.
+
 ## Project layout
 
 ```
