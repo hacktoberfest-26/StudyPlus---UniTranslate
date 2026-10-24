@@ -3,6 +3,7 @@ import { Search, Scale, X } from 'lucide-react';
 import { usePlanStore } from '../../store/usePlanStore.js';
 import { CAMPUSES, FORMATS, DAYS } from '../../brain/courses.js';
 import { CourseCard } from './CourseCard.jsx';
+import { ResizableBox } from '../ui/resize.jsx';
 
 const selectClass =
   'bg-slate-100 border border-slate-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500';
@@ -119,15 +120,18 @@ export function CourseCatalogue() {
         </p>
       )}
       <div className="p-4 sm:p-6">
-        {filtered.length ? (
-          <div className="grid grid-cols-1 md:grid-cols-2 2xl:grid-cols-3 gap-4">
-            {filtered.map((course) => (
-              <CourseCard key={course.code} course={course} />
-            ))}
-          </div>
-        ) : (
-          <p className="text-center text-sm text-slate-500 py-16">No courses match these filters.</p>
-        )}
+        {/* Columns follow the frame's width, so resizing it reflows the cards. */}
+        <ResizableBox id="catalog-grid" label="Course list" minWidth={300} minHeight={260} innerClassName="rounded-xl border border-slate-200 p-3">
+          {filtered.length ? (
+            <div className="grid grid-cols-1 @2xl:grid-cols-2 @5xl:grid-cols-3 @7xl:grid-cols-4 gap-4 p-1">
+              {filtered.map((course) => (
+                <CourseCard key={course.code} course={course} />
+              ))}
+            </div>
+          ) : (
+            <p className="text-center text-sm text-slate-500 py-16">No courses match these filters.</p>
+          )}
+        </ResizableBox>
       </div>
 
       {compareCodes.length > 0 && (

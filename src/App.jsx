@@ -20,6 +20,7 @@ import { CourseDataAdmin } from './components/admin/CourseDataAdmin.jsx';
 import { DepartmentTimetable } from './components/admin/DepartmentTimetable.jsx';
 import { useActiveTab } from './components/layout/TabNav.jsx';
 import { useApplyDisplayPrefs } from './display/useApplyDisplayPrefs.js';
+import { ResizableBox } from './components/ui/resize.jsx';
 
 const VIEWS = {
   // Student
@@ -62,7 +63,10 @@ function Toasts() {
   const toasts = usePlanStore((s) => s.toasts);
   const tone = { success: 'bg-green-700', warning: 'bg-amber-700', info: 'bg-ink-800' };
   return (
-    <div className="fixed bottom-24 left-1/2 -translate-x-1/2 z-[60] flex flex-col items-center gap-2 w-[min(92vw,28rem)] pointer-events-none" aria-live="polite">
+    <div
+      className="fixed bottom-24 left-1/2 -translate-x-1/2 z-[60] flex flex-col items-center gap-2 w-[min(92vw,28rem)] pointer-events-none"
+      aria-live="polite"
+    >
       {toasts.map((t) => (
         <div key={t.id} className={`view-enter ${tone[t.tone] ?? tone.info} text-white text-sm px-4 py-2 rounded-lg shadow-lg text-center`}>
           {t.text}
@@ -128,9 +132,18 @@ export default function App() {
           className={`view-enter flex-1 min-w-0 flex flex-col ${activeTab === 'advisor' ? 'p-0 sm:p-4' : ''}`}
         >
           {activeTab === 'advisor' ? (
-            <div className="h-[calc(100vh-var(--sticky-top,56px)-2rem)] min-h-[32rem] sm:rounded-xl overflow-hidden border border-slate-200 max-w-3xl w-full mx-auto flex flex-col">
+            <ResizableBox
+              id="tutor-chat"
+              label="AI tutor"
+              minWidth={300}
+              minHeight={360}
+              defaultWidth="min(100%, 48rem)"
+              defaultHeight="max(32rem, calc(100vh - var(--sticky-top, 56px) - 3rem))"
+              className="mx-auto"
+              innerClassName="sm:rounded-xl border border-slate-200"
+            >
               <View />
-            </div>
+            </ResizableBox>
           ) : (
             <View />
           )}

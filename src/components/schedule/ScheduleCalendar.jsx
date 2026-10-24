@@ -95,7 +95,7 @@ export function ScheduleCalendar() {
       )}
 
       <div className="p-4 flex flex-col xl:flex-row xl:items-start gap-4">
-        <div className="flex-1 overflow-x-auto scrollbar-thin" tabIndex={0} role="region" aria-label="Weekly timetable">
+        <div className="flex-1 min-w-0">
           <WeekGrid courses={shown} ghost={ghost} onRemove={removeCourse} tourId="calendar" />
         </div>
 

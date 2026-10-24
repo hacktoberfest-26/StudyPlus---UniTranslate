@@ -59,7 +59,13 @@ npm run build    # production bundle in dist/
   - the calendar, with a zoom control;
   - the skill tree, with zoom or *Fit to screen*.
 
-  Sizes are remembered on the device. Handles work with mouse, touch (iPad) and keyboard.
+  - every main panel and table (course list, calendars, skill tree, AI tutor, advisees, plan courses, course records), each in a frame. Drag the right-edge grip for width, the bottom grip for height, or the corner for both. The content adapts:
+    - the course grid changes its number of columns, because it uses container queries;
+    - the skill tree's *Fit to screen* re-fits to the frame;
+    - tables stretch their columns, and their headers stay pinned while you scroll inside the frame;
+    - the content scrolls inside the frame when it is larger.
+
+  Sizes are remembered on the device. Handles work with mouse, touch (iPad) and keyboard (arrow keys; Home or double-click to reset), and *Reset size* restores a frame.
 
 ## Project layout
 

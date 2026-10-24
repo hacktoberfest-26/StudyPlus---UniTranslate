@@ -7,7 +7,7 @@ import { STUDENT } from '../../brain/student.js';
 import { ancestorsOf, prerequisitesMet } from '../../agents/planning.js';
 import { conflictsWith, formatSchedule } from '../../librarian/schedule.js';
 import { usePrefsStore } from '../../store/usePrefsStore.js';
-import { ZoomControl } from '../ui/resize.jsx';
+import { ZoomControl, ResizableBox } from '../ui/resize.jsx';
 import { CAMPUSES } from '../../brain/courses.js';
 
 const MIN_W = 1000;
@@ -87,7 +87,9 @@ function NodePopover({ node, course, planCourses, canvasWidth, canvasHeight, onC
                 🔥 Clashes with {c.title}
               </span>
             ))}
-            {missing.length > 0 && <span className="text-[11px] bg-amber-100 text-amber-800 px-2 py-0.5 rounded-full">Needs {missing.join(', ')}</span>}
+            {missing.length > 0 && (
+              <span className="text-[11px] bg-amber-100 text-amber-800 px-2 py-0.5 rounded-full">Needs {missing.join(', ')}</span>
+            )}
             {!inPlan && !clashes.length && !missing.length && (
               <span className="text-[11px] bg-green-100 text-green-700 px-2 py-0.5 rounded-full">✓ Fits your timetable</span>
             )}
@@ -135,15 +137,17 @@ function rowPositions(items, width, W) {
 /** Canvas width follows the container so the graph fits without clipping (scrolls below MIN_W). */
 function useCanvasWidth() {
   const ref = useRef(null);
-  const [available, setAvailable] = useState(MIN_W);
+  const [available, setAvailable] = useState({ width: MIN_W, height: 0 });
   useEffect(() => {
     const el = ref.current;
     if (!el) return undefined;
-    const ro = new ResizeObserver(([entry]) => setAvailable(Math.floor(entry.contentRect.width)));
+    const ro = new ResizeObserver(([entry]) =>
+      setAvailable({ width: Math.floor(entry.contentRect.width), height: Math.floor(entry.contentRect.height) }),
+    );
     ro.observe(el);
     return () => ro.disconnect();
   }, []);
-  return [ref, Math.max(MIN_W, available), available];
+  return [ref, Math.max(MIN_W, available.width), available];
 }
 
 export function SkillTree() {
@@ -155,8 +159,9 @@ export function SkillTree() {
   const [canvasRef, W, available] = useCanvasWidth();
   const treeZoom = usePrefsStore((s) => s.treeZoom);
   const setPref = usePrefsStore((s) => s.setPref);
-  // "Fit" shrinks the tree to the screen width (e.g. iPad portrait); otherwise use the chosen zoom.
-  const scale = treeZoom === 'fit' ? Math.min(1, available / W) : treeZoom;
+  const frameHeight = usePrefsStore((s) => s.boxSizes['skill-tree']?.h);
+  // "Fit" shrinks the tree to its frame: the width always, the height too once the user has set one.
+  const scale = treeZoom === 'fit' ? Math.min(1, available.width / W, frameHeight ? available.height / H : Infinity) : treeZoom;
 
   useEffect(() => {
     const onKey = (e) => {
@@ -236,7 +241,9 @@ export function SkillTree() {
       <div className="bg-white border-b border-slate-200 p-4 flex flex-col md:flex-row md:items-center justify-between gap-2">
         <div>
           <h2 className="text-lg font-semibold text-slate-900">Skill Tree & Career Pathways</h2>
-          <p className="text-sm text-slate-600">Click a course to add it to your plan and highlight its prerequisite path. Click a career to see the path leading to it.</p>
+          <p className="text-sm text-slate-600">
+            Click a course to add it to your plan and highlight its prerequisite path. Click a career to see the path leading to it.
+          </p>
         </div>
         <div className="flex flex-wrap gap-2 text-xs">
           {Object.entries(STATUS_STYLE).map(([id, s]) => (
@@ -261,105 +268,114 @@ export function SkillTree() {
             resetLabel="Fit to screen"
           />
         </div>
-        <div ref={canvasRef} data-tour="skill-tree" className="overflow-auto scrollbar-thin bg-white border border-slate-200 rounded-xl">
-          <div className="relative mx-auto" style={{ width: W * scale, height: H * scale }}>
-          {/* Tapping empty canvas space closes the course card. */}
-          <div
-            className="absolute top-0 left-0 origin-top-left"
-            style={{ width: W, height: H, transform: `scale(${scale})` }}
-            onClick={(e) => e.target === e.currentTarget && setSelected(null)}
-          >
-            {[1, 2, 3, 4].map((t) => (
-              <p key={t} className="absolute left-3 z-10 bg-white/90 px-1 rounded text-[11px] font-semibold uppercase tracking-wide text-slate-400" style={{ top: TIER_Y[t] - 24 }}>
-                {TIER_TITLES[t]}
-              </p>
-            ))}
-            <svg className="absolute inset-0 pointer-events-none" width={W} height={H} aria-hidden>
-              {edges.map(({ from, to }) => {
-                const a = positions[from];
-                const b = positions[to];
-                if (!a || !b) return null;
-                const on = path.has(from) && path.has(to);
-                const midY = (a.bottom + b.top) / 2;
-                return (
-                  <path
-                    key={`${from}-${to}`}
-                    d={`M ${a.cx} ${a.bottom} C ${a.cx} ${midY}, ${b.cx} ${midY}, ${b.cx} ${b.top}`}
-                    fill="none"
-                    stroke={on ? 'var(--color-amber-500, #f59e0b)' : 'var(--edge)'}
-                    strokeWidth={on ? 3 : 1.5}
-                    opacity={selected && !on ? 0.45 : 1}
+        <ResizableBox id="skill-tree" label="Skill tree" minWidth={320} minHeight={240} innerClassName="bg-white border border-slate-200 rounded-xl">
+          <div ref={canvasRef} data-tour="skill-tree" className={frameHeight ? 'h-full' : ''}>
+            <div className="relative mx-auto" style={{ width: W * scale, height: H * scale }}>
+              {/* Tapping empty canvas space closes the course card. */}
+              <div
+                className="absolute top-0 left-0 origin-top-left"
+                style={{ width: W, height: H, transform: `scale(${scale})` }}
+                onClick={(e) => e.target === e.currentTarget && setSelected(null)}
+              >
+                {[1, 2, 3, 4].map((t) => (
+                  <p
+                    key={t}
+                    className="absolute left-3 z-10 bg-white/90 px-1 rounded text-[11px] font-semibold uppercase tracking-wide text-slate-400"
+                    style={{ top: TIER_Y[t] - 24 }}
+                  >
+                    {TIER_TITLES[t]}
+                  </p>
+                ))}
+                <svg className="absolute inset-0 pointer-events-none" width={W} height={H} aria-hidden>
+                  {edges.map(({ from, to }) => {
+                    const a = positions[from];
+                    const b = positions[to];
+                    if (!a || !b) return null;
+                    const on = path.has(from) && path.has(to);
+                    const midY = (a.bottom + b.top) / 2;
+                    return (
+                      <path
+                        key={`${from}-${to}`}
+                        d={`M ${a.cx} ${a.bottom} C ${a.cx} ${midY}, ${b.cx} ${midY}, ${b.cx} ${b.top}`}
+                        fill="none"
+                        stroke={on ? 'var(--color-amber-500, #f59e0b)' : 'var(--edge)'}
+                        strokeWidth={on ? 3 : 1.5}
+                        opacity={selected && !on ? 0.45 : 1}
+                      />
+                    );
+                  })}
+                </svg>
+
+                {nodes.map((n) => {
+                  const st = STATUS_STYLE[n.status];
+                  const on = path.has(n.id);
+                  const { Icon } = st;
+                  return (
+                    <button
+                      key={n.id}
+                      onClick={() => setSelected(selected === n.id ? null : n.id)}
+                      aria-pressed={selected === n.id}
+                      className={`absolute text-left rounded-xl border-2 p-2.5 overflow-hidden transition-all hover:scale-105 focus:outline-none focus:ring-2 focus:ring-blue-500 ${st.box} ${
+                        on ? 'shadow-[0_0_0_3px_#fbbf24,0_0_18px_rgba(251,191,36,0.5)]' : selected ? 'saturate-[.35]' : ''
+                      }`}
+                      style={{ left: n.x, top: n.y, width: NODE_W, height: NODE_H }}
+                    >
+                      <span className={`flex items-start gap-1.5 text-xs font-semibold leading-tight ${st.text}`}>
+                        <Icon className="w-4 h-4 shrink-0" aria-hidden />
+                        {n.label}
+                      </span>
+                      <span className={`block text-[11px] mt-1 ${st.text}`}>
+                        {n.cfu} CFU ·{' '}
+                        {n.status === 'locked' && n.requires.length ? `After ${n.requires.map((r) => SKILL_BY_ID[r].label).join(', ')}` : st.label}
+                      </span>
+                    </button>
+                  );
+                })}
+
+                {careers.map((c) => {
+                  const on = selected === c.id;
+                  return (
+                    <button
+                      key={c.id}
+                      onClick={() => setSelected(on ? null : c.id)}
+                      aria-pressed={on}
+                      className={`absolute text-left rounded-xl p-3 bg-gradient-to-br from-ink-800 to-ink-900 text-white shadow-lg transition-all hover:scale-105 focus:outline-none focus:ring-2 focus:ring-amber-400 ${
+                        on ? 'ring-4 ring-amber-400' : selected ? 'saturate-[.35]' : ''
+                      }`}
+                      style={{ left: c.x, top: c.y, width: CAREER_W, height: CAREER_H }}
+                    >
+                      <span className="flex items-center gap-1.5 font-bold text-sm">🎯 {c.label}</span>
+                      <span className="flex items-center gap-2 mt-1">
+                        <span className={`text-[10px] px-2 py-0.5 rounded-full ${c.demand.startsWith('High') ? 'bg-green-700' : 'bg-amber-700'}`}>
+                          {c.demand}
+                        </span>
+                        <span className="text-xs text-ink-300">{c.salary}</span>
+                      </span>
+                      <span className="block mt-2 h-1.5 bg-ink-700 rounded-full overflow-hidden">
+                        <span className="block h-full bg-amber-400" style={{ width: `${(c.progress / c.requires.length) * 100}%` }} />
+                      </span>
+                      <span className="block text-[10px] text-ink-400 mt-0.5">
+                        {c.progress}/{c.requires.length} key skills completed or planned
+                      </span>
+                    </button>
+                  );
+                })}
+
+                {selectedNode && (
+                  <NodePopover
+                    key={selectedNode.id}
+                    node={selectedNode}
+                    course={catalog.find((c) => c.provides === selectedNode.id)}
+                    planCourses={planCourses}
+                    canvasWidth={W}
+                    canvasHeight={H}
+                    onClose={() => setSelected(null)}
                   />
-                );
-              })}
-            </svg>
-
-            {nodes.map((n) => {
-              const st = STATUS_STYLE[n.status];
-              const on = path.has(n.id);
-              const { Icon } = st;
-              return (
-                <button
-                  key={n.id}
-                  onClick={() => setSelected(selected === n.id ? null : n.id)}
-                  aria-pressed={selected === n.id}
-                  className={`absolute text-left rounded-xl border-2 p-2.5 overflow-hidden transition-all hover:scale-105 focus:outline-none focus:ring-2 focus:ring-blue-500 ${st.box} ${
-                    on ? 'shadow-[0_0_0_3px_#fbbf24,0_0_18px_rgba(251,191,36,0.5)]' : selected ? 'saturate-[.35]' : ''
-                  }`}
-                  style={{ left: n.x, top: n.y, width: NODE_W, height: NODE_H }}
-                >
-                  <span className={`flex items-start gap-1.5 text-xs font-semibold leading-tight ${st.text}`}>
-                    <Icon className="w-4 h-4 shrink-0" aria-hidden />
-                    {n.label}
-                  </span>
-                  <span className={`block text-[11px] mt-1 ${st.text}`}>
-                    {n.cfu} CFU · {n.status === 'locked' && n.requires.length ? `After ${n.requires.map((r) => SKILL_BY_ID[r].label).join(', ')}` : st.label}
-                  </span>
-                </button>
-              );
-            })}
-
-            {careers.map((c) => {
-              const on = selected === c.id;
-              return (
-                <button
-                  key={c.id}
-                  onClick={() => setSelected(on ? null : c.id)}
-                  aria-pressed={on}
-                  className={`absolute text-left rounded-xl p-3 bg-gradient-to-br from-ink-800 to-ink-900 text-white shadow-lg transition-all hover:scale-105 focus:outline-none focus:ring-2 focus:ring-amber-400 ${
-                    on ? 'ring-4 ring-amber-400' : selected ? 'saturate-[.35]' : ''
-                  }`}
-                  style={{ left: c.x, top: c.y, width: CAREER_W, height: CAREER_H }}
-                >
-                  <span className="flex items-center gap-1.5 font-bold text-sm">🎯 {c.label}</span>
-                  <span className="flex items-center gap-2 mt-1">
-                    <span className={`text-[10px] px-2 py-0.5 rounded-full ${c.demand.startsWith('High') ? 'bg-green-700' : 'bg-amber-700'}`}>{c.demand}</span>
-                    <span className="text-xs text-ink-300">{c.salary}</span>
-                  </span>
-                  <span className="block mt-2 h-1.5 bg-ink-700 rounded-full overflow-hidden">
-                    <span className="block h-full bg-amber-400" style={{ width: `${(c.progress / c.requires.length) * 100}%` }} />
-                  </span>
-                  <span className="block text-[10px] text-ink-400 mt-0.5">
-                    {c.progress}/{c.requires.length} key skills completed or planned
-                  </span>
-                </button>
-              );
-            })}
-
-            {selectedNode && (
-              <NodePopover
-                key={selectedNode.id}
-                node={selectedNode}
-                course={catalog.find((c) => c.provides === selectedNode.id)}
-                planCourses={planCourses}
-                canvasWidth={W}
-                canvasHeight={H}
-                onClose={() => setSelected(null)}
-              />
-            )}
+                )}
+              </div>
+            </div>
           </div>
-          </div>
-        </div>
+        </ResizableBox>
 
         {selected && (
           <section className="bg-white border border-slate-200 rounded-xl p-4" aria-live="polite">

@@ -69,7 +69,7 @@ export function DepartmentTimetable() {
           )}
         </section>
 
-        <div className="overflow-x-auto scrollbar-thin" tabIndex={0} role="region" aria-label="Department weekly timetable">
+        <div>
           <WeekGrid courses={courses} tourId="dept-timetable" collisionLabel="⚠️ Slot clash" />
         </div>
       </div>

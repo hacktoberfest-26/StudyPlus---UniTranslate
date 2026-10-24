@@ -46,7 +46,7 @@ const STUDENT_STEPS = [
     target: 'course-card',
     tab: 'catalog',
     title: 'Course cards',
-    body: 'Each card shows the schedule, location and attendance rule, and warns you about clashes or missing prerequisites. Add it to your draft, preview it on your calendar, or select 2–3 courses to compare side by side.',
+    body: 'Each card shows the schedule, location and attendance rule, and warns you about clashes or missing prerequisites. Add it to your draft, preview it on your calendar, or select 2–3 courses to compare side by side. Drag the grips on the right and bottom edges of the course list, or its corner, to resize it. The cards rearrange to fit.',
   },
   {
     target: 'view-mode',

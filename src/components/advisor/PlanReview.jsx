@@ -10,7 +10,7 @@ import { AlertCard } from '../alerts/ProactiveAlerts.jsx';
 import { WeekGrid } from '../schedule/WeekGrid.jsx';
 import { TypeChip } from '../ui/primitives.jsx';
 import { STATUS_PILLS } from './AdviseesDashboard.jsx';
-import { useColumnWidths, ResizableTh, ResetColumnsButton } from '../ui/resize.jsx';
+import { useColumnWidths, ResizableTh, ResetColumnsButton, ResizableBox } from '../ui/resize.jsx';
 
 const PLAN_COLUMNS = { course: 260, type: 130, schedule: 190, cfu: 80, status: 120 };
 
@@ -121,7 +121,9 @@ export function PlanReview() {
           <span className="inline-flex items-center gap-1 text-xs text-slate-500">
             <Lock className="w-3.5 h-3.5" aria-hidden /> Read-only for advisors
           </span>
-          <span className={`text-xs font-medium px-2.5 py-1 rounded-full ${STATUS_PILLS[submission].className}`}>{STATUS_PILLS[submission].label}</span>
+          <span className={`text-xs font-medium px-2.5 py-1 rounded-full ${STATUS_PILLS[submission].className}`}>
+            {STATUS_PILLS[submission].label}
+          </span>
         </div>
       </div>
 
@@ -140,43 +142,51 @@ export function PlanReview() {
             </ul>
           </section>
 
-          <section tabIndex={0} className="bg-white border border-slate-200 rounded-xl overflow-x-auto scrollbar-thin" aria-label="Courses in the plan">
-            <table className="table-fixed text-sm [&_td]:break-words" style={{ width: cols.total, minWidth: '100%' }}>
-              <caption className="text-left font-semibold text-slate-900 px-4 pt-4 pb-2">
-                Courses in the plan · {planCourses.length} courses, {total} CFU <ResetColumnsButton cols={cols} />
-              </caption>
-              <thead className="bg-slate-50 text-xs uppercase tracking-wide text-slate-500">
-                <tr>
-                  <ResizableTh id="course" label="Course" cols={cols} className="text-left px-4" />
-                  <ResizableTh id="type" label="Type" cols={cols} className="text-left px-4" />
-                  <ResizableTh id="schedule" label="Schedule" cols={cols} className="text-left px-4" />
-                  <ResizableTh id="cfu" label="CFU" cols={cols} className="text-right px-4" />
-                  <ResizableTh id="status" label="Status" cols={cols} className="text-left px-4" />
-                </tr>
-              </thead>
-              <tbody>
-                {planCourses.map((c) => (
-                  <tr key={c.code} className={`border-t border-slate-100 ${conflictCodes.has(c.code) ? 'bg-red-50' : ''}`}>
-                    <td className="px-4 py-2.5">
-                      <p className="font-medium text-slate-900">{c.title}</p>
-                      <p className="text-xs font-mono text-slate-500">{c.code}</p>
-                    </td>
-                    <td className="px-4 py-2.5">
-                      <TypeChip type={c.type} />
-                    </td>
-                    <td className="px-4 py-2.5 text-slate-700">
-                      {formatSchedule(c)}
-                      {conflictCodes.has(c.code) && <span className="block text-xs font-medium text-red-700">🔥 Overlap</span>}
-                    </td>
-                    <td className="px-4 py-2.5 text-right tabular-nums">{c.cfu}</td>
-                    <td className="px-4 py-2.5 text-xs">{c.status === 'confirmed' ? 'Confirmed' : 'Draft'}</td>
+          <ResizableBox
+            id="plan-courses-table"
+            label="Courses in the plan"
+            minWidth={320}
+            minHeight={160}
+            innerClassName="bg-white border border-slate-200 rounded-xl"
+          >
+            <section aria-label="Courses in the plan">
+              <table className="table-fixed text-sm [&_td]:break-words" style={{ width: cols.total, minWidth: '100%' }}>
+                <caption className="text-left font-semibold text-slate-900 px-4 pt-4 pb-2">
+                  Courses in the plan · {planCourses.length} courses, {total} CFU <ResetColumnsButton cols={cols} />
+                </caption>
+                <thead className="sticky top-0 z-10 bg-slate-50 text-xs uppercase tracking-wide text-slate-500">
+                  <tr>
+                    <ResizableTh id="course" label="Course" cols={cols} className="text-left px-4" />
+                    <ResizableTh id="type" label="Type" cols={cols} className="text-left px-4" />
+                    <ResizableTh id="schedule" label="Schedule" cols={cols} className="text-left px-4" />
+                    <ResizableTh id="cfu" label="CFU" cols={cols} className="text-right px-4" />
+                    <ResizableTh id="status" label="Status" cols={cols} className="text-left px-4" />
                   </tr>
-                ))}
-              </tbody>
-            </table>
-          </section>
+                </thead>
+                <tbody>
+                  {planCourses.map((c) => (
+                    <tr key={c.code} className={`border-t border-slate-100 ${conflictCodes.has(c.code) ? 'bg-red-50' : ''}`}>
+                      <td className="px-4 py-2.5">
+                        <p className="font-medium text-slate-900">{c.title}</p>
+                        <p className="text-xs font-mono text-slate-500">{c.code}</p>
+                      </td>
+                      <td className="px-4 py-2.5">
+                        <TypeChip type={c.type} />
+                      </td>
+                      <td className="px-4 py-2.5 text-slate-700">
+                        {formatSchedule(c)}
+                        {conflictCodes.has(c.code) && <span className="block text-xs font-medium text-red-700">🔥 Overlap</span>}
+                      </td>
+                      <td className="px-4 py-2.5 text-right tabular-nums">{c.cfu}</td>
+                      <td className="px-4 py-2.5 text-xs">{c.status === 'confirmed' ? 'Confirmed' : 'Draft'}</td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </section>
+          </ResizableBox>
 
-          <section aria-label="Alex's weekly timetable" className="overflow-x-auto scrollbar-thin" tabIndex={0}>
+          <section aria-label="Alex's weekly timetable">
             <h3 className="font-semibold text-slate-900 mb-2">Weekly timetable</h3>
             <WeekGrid courses={planCourses} tourId="review-calendar" />
           </section>
