@@ -72,7 +72,7 @@
 
 :root {
   /* Slightly darker than Tailwind's defaults so secondary text passes WCAG AA on tinted cards. */
-  --color-slate-400: #66768c;
+  --color-slate-400: #5f6f85;
   --color-slate-500: #556377;
   --surface: #ffffff;
   --page: #f8fafc;

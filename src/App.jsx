@@ -2,8 +2,6 @@ import { useEffect, useRef } from 'react';
 import { usePlanStore } from './store/usePlanStore.js';
 import { useAlerts } from './store/derived.js';
 import { Header } from './components/layout/Header.jsx';
-import { RoleContextBar } from './components/layout/RoleContextBar.jsx';
-import { DegreeProgress } from './components/layout/DegreeProgress.jsx';
 import { TabNav } from './components/layout/TabNav.jsx';
 import { ProactiveAlerts } from './components/alerts/ProactiveAlerts.jsx';
 import { CourseCatalogue } from './components/catalogue/CourseCatalogue.jsx';
@@ -21,9 +19,24 @@ import { DepartmentTimetable } from './components/admin/DepartmentTimetable.jsx'
 import { useActiveTab } from './components/layout/TabNav.jsx';
 import { useApplyDisplayPrefs } from './display/useApplyDisplayPrefs.js';
 import { ResizableBox } from './components/ui/resize.jsx';
+import { SignInPage } from './components/auth/SignInPage.jsx';
+import { StudentHome } from './components/home/StudentHome.jsx';
+import { PathFinder } from './components/newcomer/PathFinder.jsx';
+import { Programmes } from './components/newcomer/Programmes.jsx';
+import { Shortlist } from './components/newcomer/Shortlist.jsx';
+import { ReportsInbox } from './components/admin/ReportsInbox.jsx';
+import { HelpCenter } from './components/support/HelpCenter.jsx';
+import { SettingsPanel } from './components/layout/SettingsPanel.jsx';
+import { DisplaySettingsPanel } from './components/layout/DisplaySettings.jsx';
+import { Footer } from './components/layout/Footer.jsx';
 
 const VIEWS = {
+  // Future student (newcomer)
+  paths: PathFinder,
+  programmes: Programmes,
+  shortlist: Shortlist,
   // Student
+  home: StudentHome,
   catalog: CourseCatalogue,
   schedule: ScheduleCalendar,
   skills: SkillTree,
@@ -35,7 +48,11 @@ const VIEWS = {
   // Department admin
   courses: CourseDataAdmin,
   timetable: DepartmentTimetable,
+  reports: ReportsInbox,
 };
+
+/** Student views where the plan is edited, so the live alerts panel sits beside them. */
+const PLAN_EDITING_VIEWS = ['catalog', 'schedule'];
 
 /** On small screens the alert panel scrolls away, so critical alerts are also pinned here. */
 function MobileCriticalStrip() {
@@ -89,8 +106,35 @@ function useStickyOffset() {
   return ref;
 }
 
+/** Modals and notifications available signed in or out. */
+function GlobalLayers() {
+  return (
+    <>
+      <HelpCenter />
+      <DisplaySettingsPanel />
+      <Toasts />
+    </>
+  );
+}
+
 export default function App() {
   useApplyDisplayPrefs();
+  const signedIn = usePlanStore((s) => !!s.session);
+  if (!signedIn) {
+    return (
+      <>
+        <a href="#main-content" className="skip-link">
+          Skip to main content
+        </a>
+        <SignInPage />
+        <GlobalLayers />
+      </>
+    );
+  }
+  return <Workspace />;
+}
+
+function Workspace() {
   const role = usePlanStore((s) => s.role);
   const activeTab = useActiveTab();
   const View = VIEWS[activeTab];
@@ -109,20 +153,18 @@ export default function App() {
       <a href="#main-content" className="skip-link">
         Skip to main content
       </a>
-      <header className="bg-white">
+      <header className="bg-white border-b border-slate-200">
         <Header />
-        {isStudent && <DegreeProgress />}
-        {isStudent ? <RoleContextBar /> : <div className="h-3" />}
       </header>
 
       {/* The page scrolls as a whole; the tabs (and any critical alert on small screens) stay pinned. */}
       <div ref={stickyRef} className="sticky top-0 z-30 bg-white/95 backdrop-blur border-b border-slate-200 shadow-sm">
-        {isStudent && <MobileCriticalStrip />}
+        {isStudent && activeTab !== 'home' && <MobileCriticalStrip />}
         <TabNav />
       </div>
 
       <div className="flex-1 flex flex-col lg:flex-row lg:items-start">
-        {isStudent && <ProactiveAlerts />}
+        {isStudent && PLAN_EDITING_VIEWS.includes(activeTab) && <ProactiveAlerts />}
         <main
           key={activeTab}
           tabIndex={-1}
@@ -150,12 +192,14 @@ export default function App() {
         </main>
       </div>
 
+      <Footer />
       <ComparisonDrawer />
       <SyllabusModal />
       {isStudent && <ChatDrawer />}
       <ConfirmChangeDialog />
+      <SettingsPanel />
       <GuidedTour />
-      <Toasts />
+      <GlobalLayers />
     </div>
   );
 }

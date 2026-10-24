@@ -1,20 +1,20 @@
 /**
- * Global H-OS state (Zustand). Every plan mutation is "auto-saved" (persisted to
+ * Global app state (Zustand). Every plan mutation is "auto-saved" (persisted to
  * localStorage) and re-evaluated by the proactive agents via the derived hooks.
  */
 import { create } from 'zustand';
 import { persist, createJSONStorage } from 'zustand/middleware';
 import { BRAIN_COURSES } from '../brain/courses.js';
 import { INITIAL_PLAN, STUDENT, ROLES } from '../brain/student.js';
-
-/** The view each role lands on. */
-export const DEFAULT_TAB = { student: 'catalog', advisor: 'advisees', admin: 'courses' };
 import { RAW_SYLLABUS_FEED } from '../brain/rawFeed.js';
 import { normalizeCourse } from '../librarian/normalize.js';
 import { ingestFeed } from '../librarian/ingest.js';
 import { tutorRespond } from '../agents/tutorEngine.js';
 import { assessChange } from '../agents/impact.js';
 import { runProactiveAgents } from '../agents/proactiveAgent.js';
+
+/** The view each role lands on. */
+export const DEFAULT_TAB = { newcomer: 'paths', student: 'home', advisor: 'advisees', admin: 'courses' };
 
 const initialCatalog = () => BRAIN_COURSES.map((raw) => normalizeCourse(raw).course);
 
@@ -29,7 +29,7 @@ const initialState = () => ({
   advisorNote: null,
   lastSavedAt: null,
   ingestReport: null,
-  activeTab: 'catalog',
+  activeTab: 'home',
   scheduleMode: 'confirmed',
   ghostCode: null,
   hoverGhostCode: null,
@@ -45,6 +45,11 @@ const initialState = () => ({
   toursDone: {},
   tourStep: null,
   reviewLog: [],
+  session: null, // { name, email } once signed in
+  panel: null, // 'settings' | 'display' | 'help' — modal panels opened from the account menu
+  settingsSection: 'account',
+  shortlist: [], // newcomer's saved routes: "careerId:routeIndex"
+  reports: [], // bug reports and messages sent from Help & feedback
 });
 
 export const usePlanStore = create(
@@ -138,6 +143,31 @@ export const usePlanStore = create(
           // Each interface has its own short tour the first time it is opened.
           if (!get().toursDone[role]) get().startTour();
         },
+        signIn: (role, { name, email }) => {
+          set({ session: { name: name || ROLES[role].demo.name, email: email || ROLES[role].demo.email }, panel: null });
+          get().setRole(role);
+        },
+        signOut: () => set({ session: null, panel: null, chatOpen: false, tourStep: null, compareOpen: false, syllabusCode: null }),
+
+        openPanel: (panel, settingsSection) => set((s) => ({ panel, settingsSection: settingsSection ?? s.settingsSection, chatOpen: false })),
+        closePanel: () => set({ panel: null }),
+
+        toggleShortlist: (key) => {
+          const saved = get().shortlist.includes(key);
+          set((s) => ({ shortlist: saved ? s.shortlist.filter((k) => k !== key) : [...s.shortlist, key] }));
+          toast(saved ? 'Removed from your shortlist.' : 'Saved to your shortlist.', saved ? 'info' : 'success');
+        },
+
+        /** Stores a bug report or support message; the department admin sees them in "Reports". */
+        submitReport: (report) => {
+          const id = `UT-${1041 + get().reports.length}`;
+          set((s) => ({
+            reports: [...s.reports, { id, at: new Date().toISOString(), role: s.role, from: s.session?.email ?? 'anonymous', status: 'open', ...report }],
+          }));
+          return id;
+        },
+        resolveReport: (id) => set((s) => ({ reports: s.reports.map((r) => (r.id === id ? { ...r, status: 'resolved' } : r)) })),
+
         setTab: (activeTab) => set({ activeTab }),
         setScheduleMode: (scheduleMode) => set({ scheduleMode }),
 
@@ -296,7 +326,8 @@ export const usePlanStore = create(
         },
 
         resetDemo: () => {
-          set({ ...initialState(), role: get().role, activeTab: DEFAULT_TAB[get().role], toursDone: get().toursDone });
+          const { role, toursDone, session, reports } = get();
+          set({ ...initialState(), role, activeTab: DEFAULT_TAB[role], toursDone, session, reports });
           toast('Demo data reset.');
         },
       };
@@ -314,10 +345,13 @@ export const usePlanStore = create(
         ingestReport: s.ingestReport,
         toursDone: s.toursDone,
         reviewLog: s.reviewLog,
+        session: s.session,
+        shortlist: s.shortlist,
+        reports: s.reports,
       }),
-      version: 1,
-      // v0 stored a single `tourDone` flag for the (then only) student tour.
+      version: 2,
       migrate: (state, version) => {
+        // v0 stored a single `tourDone` flag for the (then only) student tour.
         if (version === 0 && state) {
           state.toursDone = { student: !!state.tourDone };
           delete state.tourDone;

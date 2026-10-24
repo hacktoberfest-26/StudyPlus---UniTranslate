@@ -1,6 +1,6 @@
-import { useState } from 'react';
 import { Accessibility, Monitor, Sun, Moon, X, TriangleAlert, CircleAlert, CircleCheck } from 'lucide-react';
 import { usePrefsStore } from '../../store/usePrefsStore.js';
+import { usePlanStore } from '../../store/usePlanStore.js';
 import { COURSE_TYPES } from '../../brain/courses.js';
 import { Modal } from '../ui/primitives.jsx';
 
@@ -80,23 +80,11 @@ function Preview() {
   );
 }
 
-export function DisplaySettingsButton() {
-  const [open, setOpen] = useState(false);
-  return (
-    <>
-      <button
-        onClick={() => setOpen(true)}
-        data-tour="a11y"
-        className="inline-flex items-center gap-1.5 px-3 py-2 rounded-lg border border-slate-300 text-sm font-medium text-slate-600 hover:bg-slate-100 focus:outline-none focus:ring-2 focus:ring-blue-500"
-        aria-haspopup="dialog"
-      >
-        <Accessibility className="w-4 h-4" aria-hidden />
-        <span className="hidden sm:inline">Display</span>
-        <span className="sr-only sm:hidden">Display and accessibility settings</span>
-      </button>
-      {open && <DisplaySettings onClose={() => setOpen(false)} />}
-    </>
-  );
+/** Display & accessibility panel, opened from the account menu, settings or the footer. */
+export function DisplaySettingsPanel() {
+  const open = usePlanStore((s) => s.panel === 'display');
+  const closePanel = usePlanStore((s) => s.closePanel);
+  return open ? <DisplaySettings onClose={closePanel} /> : null;
 }
 
 function DisplaySettings({ onClose }) {

@@ -1,13 +1,19 @@
-import { BookOpen, Calendar, GitBranch, Bot, Users, ClipboardCheck, Database, CalendarRange } from 'lucide-react';
+import { BookOpen, Calendar, Target, Bot, Users, ClipboardCheck, Database, CalendarRange, House, Compass, School, Bookmark, Inbox } from 'lucide-react';
 import { usePlanStore } from '../../store/usePlanStore.js';
 
 /** Each role has its own set of views. */
 export const ROLE_TABS = {
+  newcomer: [
+    { id: 'paths', label: 'Find your path', short: 'Find your path', icon: Compass },
+    { id: 'programmes', label: 'All programmes', short: 'Programmes', icon: School },
+    { id: 'shortlist', label: 'My shortlist', short: 'Shortlist', icon: Bookmark },
+  ],
   student: [
-    { id: 'catalog', label: 'Course Catalogue & Smart Assistant', short: 'Catalogue', icon: BookOpen },
-    { id: 'schedule', label: 'Weekly Schedule & Ghost Calendar', short: 'Schedule', icon: Calendar },
-    { id: 'skills', label: 'Skill Tree & Career Pathways', short: 'Skill Tree', icon: GitBranch },
-    { id: 'advisor', label: 'StudyPlus AI Tutor', short: 'AI Tutor', icon: Bot },
+    { id: 'home', label: 'Home', short: 'Home', icon: House },
+    { id: 'catalog', label: 'Explore courses', short: 'Courses', icon: BookOpen },
+    { id: 'schedule', label: 'My week', short: 'My week', icon: Calendar },
+    { id: 'skills', label: 'Start from a goal', short: 'Goals', icon: Target },
+    { id: 'advisor', label: 'Ask the tutor', short: 'Tutor', icon: Bot },
   ],
   advisor: [
     { id: 'advisees', label: 'My Advisees', short: 'Advisees', icon: Users },
@@ -17,10 +23,11 @@ export const ROLE_TABS = {
   admin: [
     { id: 'courses', label: 'Course Data & Librarian', short: 'Course Data', icon: Database },
     { id: 'timetable', label: 'Department Timetable', short: 'Timetable', icon: CalendarRange },
+    { id: 'reports', label: 'Reports & feedback', short: 'Reports', icon: Inbox },
   ],
 };
 
-const ACTIVE_STYLE = { student: 'bg-blue-600', advisor: 'bg-emerald-700', admin: 'bg-ink-800' };
+const ACTIVE_STYLE = { newcomer: 'bg-amber-700', student: 'bg-blue-600', advisor: 'bg-emerald-700', admin: 'bg-ink-800' };
 
 /** The tab to render: falls back to the role's first view if the stored tab belongs to another role. */
 export function useActiveTab() {
@@ -47,7 +54,7 @@ export function TabNav() {
 
   return (
     <nav data-tour="tabs" className="px-4 sm:px-6 py-2 overflow-x-auto scrollbar-thin">
-      <div role="tablist" aria-label="H-OS views" className="flex gap-2 min-w-max" onKeyDown={onKeyDown}>
+      <div role="tablist" aria-label="Sections" className="flex gap-2 min-w-max" onKeyDown={onKeyDown}>
         {TABS.map(({ id, label, short, icon: Icon }) => {
           const active = activeTab === id;
           return (

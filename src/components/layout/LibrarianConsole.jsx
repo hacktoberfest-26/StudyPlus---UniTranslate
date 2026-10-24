@@ -21,7 +21,7 @@ export function LibrarianConsole() {
     <section className="bg-ink-900 text-ink-100 rounded-lg" aria-label="Librarian console">
       <button onClick={() => setOpen(!open)} aria-expanded={open} className="w-full flex items-center justify-between px-3 py-2 text-sm font-semibold">
         <span className="flex items-center gap-2">
-          <Database className="w-4 h-4 text-cyan-300" aria-hidden /> 🏛️ Librarian Console — H-OS Brain data pipeline
+          <Database className="w-4 h-4 text-cyan-300" aria-hidden /> Course data import (Librarian)
         </span>
         <ChevronDown className={`w-4 h-4 transition-transform ${open ? 'rotate-180' : ''}`} aria-hidden />
       </button>

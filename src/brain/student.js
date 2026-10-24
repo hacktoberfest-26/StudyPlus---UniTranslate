@@ -34,10 +34,36 @@ export const INITIAL_PLAN = [
   { code: 'BCT-240', status: 'draft' },
 ];
 
+/** Who can sign in. Each role gets its own workspace; the demo accounts pre-fill the sign-in form. */
 export const ROLES = {
-  student: { label: '🎓 Student (Alex - AI/Data Track)', short: 'Student' },
-  advisor: { label: '👨‍🏫 Academic Advisor (Prof. Rossi)', short: 'Advisor' },
-  admin: { label: '🏛️ Department Admin', short: 'Admin' },
+  newcomer: {
+    label: 'Future student',
+    short: 'Future student',
+    icon: '🧭',
+    description: 'Just finished high school? Pick a career you like and see every way to get there.',
+    demo: { name: 'Sam', email: 'sam@example.com' },
+  },
+  student: {
+    label: 'Current student',
+    short: 'Student',
+    icon: '🎓',
+    description: 'Plan your semester, check your timetable and track your degree.',
+    demo: { name: 'Alex', email: 'alex@student.unitranslate.example' },
+  },
+  advisor: {
+    label: 'Academic advisor',
+    short: 'Advisor',
+    icon: '👨‍🏫',
+    description: "Review and approve your students' study plans.",
+    demo: { name: 'Prof. Rossi', email: 'rossi@staff.unitranslate.example' },
+  },
+  admin: {
+    label: 'Department staff',
+    short: 'Admin',
+    icon: '🏛️',
+    description: 'Maintain the course catalogue and the department timetable.',
+    demo: { name: 'Department office', email: 'office@staff.unitranslate.example' },
+  },
 };
 
 /** Other advisees of Prof. Rossi — static sample records to populate the advisor dashboard. */

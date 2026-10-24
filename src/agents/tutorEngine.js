@@ -1,5 +1,5 @@
 /**
- * StudyPlus AI Tutor — rule-based reasoning over the H-OS Brain.
+ * UniTranslate Tutor — rule-based reasoning over the Brain (courses, plan, student record).
  *
  * Every answer is computed from live state (catalogue, draft plan, student record),
  * so recommendations always reflect the current timetable. Responses are structured
@@ -115,7 +115,7 @@ function careerReply(career, ctx) {
     })
     .filter(Boolean);
 
-  let text = `For a career as **${career.label}** (${career.demand}, ${career.salary}) the H-OS skill graph maps these milestones:\n${list(lines)}`;
+  let text = `For a career as **${career.label}** (${career.demand}, ${career.salary}) these are the milestones:\n${list(lines)}`;
   text += fits.length
     ? `\n\nThese electives fit your timetable with **no overlap** and all prerequisites met:`
     : `\n\nNo additional elective for this pathway fits your current timetable without a clash.`;

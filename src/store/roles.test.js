@@ -63,3 +63,41 @@ describe('Role permissions', () => {
     expect(store().activeTab).toBe('courses');
   });
 });
+
+describe('Sign-in, newcomers and support', () => {
+  beforeEach(() => {
+    store().signOut();
+    usePlanStore.setState({ toursDone: { newcomer: true, student: true, advisor: true, admin: true }, reports: [], shortlist: [] });
+  });
+
+  it('signing in picks the workspace and its first view', () => {
+    store().signIn('newcomer', {});
+    expect(store().session.name).toBe('Sam');
+    expect(store().activeTab).toBe('paths');
+    store().signOut();
+    expect(store().session).toBeNull();
+    store().signIn('student', { name: 'Alex Moretti', email: 'alex@example.com' });
+    expect(store().session).toEqual({ name: 'Alex Moretti', email: 'alex@example.com' });
+    expect(store().activeTab).toBe('home');
+  });
+
+  it('newcomers can shortlist routes but not touch the study plan', () => {
+    store().signIn('newcomer', {});
+    const before = codes();
+    store().addCourse('DMN-310');
+    expect(codes()).toEqual(before);
+    store().toggleShortlist('ai-data-analyst:0');
+    expect(store().shortlist).toEqual(['ai-data-analyst:0']);
+    store().toggleShortlist('ai-data-analyst:0');
+    expect(store().shortlist).toEqual([]);
+  });
+
+  it('bug reports get a reference and can be resolved', () => {
+    store().signIn('student', {});
+    const id = store().submitReport({ type: 'bug', summary: 'Button does nothing', details: 'Button does nothing' });
+    expect(id).toBe('UT-1041');
+    expect(store().reports[0]).toMatchObject({ id, role: 'student', status: 'open', from: 'alex@student.unitranslate.example' });
+    store().resolveReport(id);
+    expect(store().reports[0].status).toBe('resolved');
+  });
+});

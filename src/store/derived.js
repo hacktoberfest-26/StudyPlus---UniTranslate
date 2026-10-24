@@ -1,5 +1,5 @@
 /**
- * Derived H-OS state. Selectors return stable slices; heavy computation is memoised here
+ * Derived app state. Selectors return stable slices; heavy computation is memoised here
  * so every component sees the same real-time view of the plan.
  */
 import { useMemo } from 'react';

@@ -1,5 +1,5 @@
 /**
- * Librarian — normalises course records into the H-OS Brain schema and reports data issues.
+ * Librarian — normalises course records into the Brain schema and reports data issues.
  *
  * A record with blocking issues (no code/title, no CFU, no schedule) is quarantined
  * rather than published to the catalogue.

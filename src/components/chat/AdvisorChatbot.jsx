@@ -28,7 +28,7 @@ function BotAvatar() {
   );
 }
 
-/** Live view of what the tutor "knows" from the H-OS Brain. */
+/** Live view of what the tutor knows about the student. */
 function ContextCard() {
   const { planCourses, total, conflicts } = usePlanSummary();
   const done = Object.values(STUDENT.completedCfu).reduce((s, v) => s + v, 0);
@@ -36,7 +36,7 @@ function ContextCard() {
   return (
     <div className="bg-blue-50 border border-blue-200 rounded-lg p-3">
       <p className="flex items-center gap-2 mb-1.5 text-xs font-semibold text-blue-800">
-        <Info className="w-4 h-4" aria-hidden /> H-OS Brain context (live)
+        <Info className="w-4 h-4" aria-hidden /> What I know about you (live)
       </p>
       <ul className="text-xs text-blue-700 space-y-0.5">
         <li>
@@ -81,8 +81,8 @@ export function AdvisorChatbot({ onClose }) {
             <Bot className="w-6 h-6" aria-hidden />
           </div>
           <div className="min-w-0">
-            <h3 className="font-semibold truncate">StudyPlus AI Tutor</h3>
-            <p className="text-xs text-purple-200">Academic Advisor & Tutor · Powered by H-OS Brain</p>
+            <h3 className="font-semibold truncate">UniTranslate Tutor</h3>
+            <p className="text-xs text-purple-200">Knows your record and every timetable</p>
           </div>
         </div>
         <div className="flex items-center gap-2">
@@ -220,7 +220,7 @@ export function ChatDrawer() {
         <button
           onClick={openChat}
           className="fixed bottom-5 right-5 w-14 h-14 bg-gradient-to-br from-purple-600 to-indigo-600 rounded-full shadow-lg hover:shadow-xl z-40 flex items-center justify-center focus:outline-none focus:ring-4 focus:ring-purple-300"
-          aria-label="Open StudyPlus AI Tutor"
+          aria-label="Open the tutor"
         >
           <Bot className="w-7 h-7 text-white" aria-hidden />
           <span className="absolute -top-0.5 -right-0.5 w-4 h-4 bg-green-500 rounded-full border-2 border-white" />

@@ -6,194 +6,167 @@ import { usePlanStore } from '../../store/usePlanStore.js';
  * Steps of the first-visit tour. `target` is a [data-tour] anchor; `tab` and
  * `scheduleMode` put the app in the right state before the step is shown.
  */
+const MENU_STEP = {
+  target: 'account-menu',
+  title: 'Your account menu',
+  body: 'Settings, display & accessibility (dark mode, colour-blind mode, text size), this tour, help and sign out are all here.',
+};
+const HELP_STEP = {
+  target: 'help',
+  title: "You're all set",
+  body: 'Questions, or something not working? Tap ? for contact details, FAQ and a quick bug-report form.',
+};
+
 const STUDENT_STEPS = [
   {
-    title: 'Welcome to StudyPlus UniTranslate',
-    body: "This short tour (about 2 minutes) shows how to plan your semester: browse courses, test them on your timetable, follow your career path and get help from the AI tutor. Skip it if you already know your way around. You can restart it anytime from the Tour button.",
+    tab: 'home',
+    title: 'Welcome to UniTranslate',
+    body: 'A quick tour of where to start. Skip it if you prefer to look around. You can replay it anytime from your account menu.',
   },
   {
-    target: 'role',
-    title: 'Switch roles',
-    body: 'This demo has three separate workspaces. You are in the Student workspace, where you build your plan. Switch here to see the Academic Advisor who reviews it, or the Department Admin who manages course data.',
+    target: 'entry-points',
+    tab: 'home',
+    title: 'Pick a starting point',
+    body: 'Explore a course, start from a career goal, plan your week, or ask the tutor. Each one opens the right view.',
   },
   {
-    target: 'autosave',
-    title: 'Your draft saves itself',
-    body: 'Every change is saved automatically. The status shows whether your plan is an active draft, waiting for review, or approved.',
+    target: 'attention',
+    tab: 'home',
+    title: 'What needs attention',
+    body: 'Clashes and missing requirements show up here as soon as they happen, with a one-tap fix where possible.',
   },
   {
-    target: 'progress',
-    title: 'Degree progress',
-    body: 'Solid colour shows the 114 of 180 CFU you have completed, split into Core, Electives and Thesis. Striped colour shows the credits planned this semester.',
-  },
-  {
-    target: 'alerts',
-    title: 'Alerts that watch your plan',
-    body: 'Agents check your plan after every change. A red overlap alert cannot be dismissed. It disappears only when you fix the clash, for example with ⚡ Apply Smart Recommendation. Yellow alerts flag missing prerequisites or credits. On wide screens this panel stays in view as you scroll, and you can drag its edge to make it wider.',
-  },
-  {
-    target: 'tabs',
-    title: 'Four views of one plan',
-    body: 'Catalogue, Schedule, Skill Tree and AI Tutor all share the same live plan, so a change in one view shows up everywhere.',
-  },
-  {
-    target: 'catalog-filters',
-    tab: 'catalog',
-    title: 'Find courses',
-    body: 'Search by title, code or lecturer, and filter by campus, teaching format, CFU and the days you want to be on campus.',
+    target: 'semester',
+    tab: 'home',
+    title: 'Your degree and this semester',
+    body: 'See your credits so far and what this plan adds. When there are no clashes, submit the plan to your advisor here.',
   },
   {
     target: 'course-card',
     tab: 'catalog',
-    title: 'Course cards',
-    body: 'Each card shows the schedule, location and attendance rule, and warns you about clashes or missing prerequisites. Add it to your draft, preview it on your calendar, or select 2–3 courses to compare side by side. Drag the grips on the right and bottom edges of the course list, or its corner, to resize it. The cards rearrange to fit.',
+    title: 'Explore courses',
+    body: 'Each card warns about clashes and missing prerequisites before you add it. Preview it on your week, or compare 2–3 courses side by side.',
   },
   {
-    target: 'view-mode',
-    tab: 'schedule',
-    scheduleMode: 'draft',
-    title: 'Confirmed vs. draft',
-    body: 'Confirmed Schedule shows only courses you are enrolled in. Draft Preview adds the courses you are still considering.',
+    target: 'alerts',
+    tab: 'catalog',
+    title: 'Alerts while you plan',
+    body: 'While you change your plan, alerts stay beside you. A red clash can’t be dismissed; it goes away once the clash is fixed.',
   },
   {
     target: 'calendar',
     tab: 'schedule',
     scheduleMode: 'draft',
-    title: 'Your week at a glance',
-    body: 'Blue is compulsory, purple elective, green seminar. When two classes overlap, the clash flashes red with "🔥 Schedule Collision!". Use Calendar zoom above the grid to make the hours taller or shorter.',
-  },
-  {
-    target: 'ghost-picker',
-    tab: 'schedule',
-    scheduleMode: 'draft',
-    title: 'Ghost preview',
-    body: 'Hover over or tap a course here to see it as a striped "ghost" on your week before you add it. Clashes show up immediately.',
+    title: 'My week',
+    body: 'Your timetable. Clashes flash red. Tap a course on the right to preview it before adding it.',
   },
   {
     target: 'skill-tree',
     tab: 'skills',
-    title: 'Skill tree & careers',
-    body: 'Follow how foundation courses unlock advanced subjects and careers. Tap a course to add it to your plan, preview it or read its syllabus. Tap a career to highlight the exact path that leads to it.',
+    title: 'Start from a goal',
+    body: 'Tap a career to see the courses that lead there. Tap a course to add it to your plan.',
   },
   {
     target: 'tutor',
     tab: 'advisor',
-    title: 'StudyPlus AI Tutor',
-    body: 'Ask about electives, clashes, prerequisites or careers. Switch to Course Concept Tutor mode for syllabus explanations. Suggested courses come with ⚡ Add to Plan and 📅 Ghost Preview buttons.',
+    title: 'Ask the tutor',
+    body: 'Ask in plain words, e.g. “Which electives fit my timetable for FinTech?”. Suggested courses come with Add and Preview buttons.',
+  },
+  MENU_STEP,
+  HELP_STEP,
+];
+
+const NEWCOMER_STEPS = [
+  {
+    tab: 'paths',
+    title: 'Welcome to UniTranslate',
+    body: 'Not sure what to study yet? Start from the job you’d like and we’ll show you how to get there.',
   },
   {
-    target: 'quick-prompts',
-    tab: 'advisor',
-    title: 'Not sure what to ask?',
-    body: 'Tap a quick prompt to get started. You can also open the tutor from any view with the round button in the bottom-right corner.',
+    target: 'interests',
+    tab: 'paths',
+    title: 'Tell us what you enjoy',
+    body: 'Pick a few interests to narrow the careers, or search for a job or a skill.',
   },
   {
-    target: 'role-bar',
-    tab: 'catalog',
-    title: 'Safe changes, then submit',
-    body: "Before you drop a course or add one that causes a clash, you'll see a confirmation listing exactly what changes. When the plan has no red alerts, submit it to Prof. Rossi here.",
+    target: 'career-grid',
+    tab: 'paths',
+    title: 'Choose a career',
+    body: 'Each card shows demand, starting salary and how many routes lead there.',
   },
   {
-    target: 'a11y',
-    title: 'Display & accessibility',
-    body: 'Switch to dark mode, a colour-blind friendly palette with patterns, larger text, high contrast, reduced motion or a more readable font. Settings are saved on this device.',
+    target: 'routes',
+    tab: 'paths',
+    title: 'Every way to get there',
+    body: 'Each route shows the programme, what you study year by year and what you need to apply. Save the ones you like.',
   },
   {
-    target: 'help',
-    title: "You're all set",
-    body: 'Tap Tour anytime to see this guide again, or ↻ to reset the demo data.',
+    target: 'tabs',
+    tab: 'paths',
+    title: 'Programmes and your shortlist',
+    body: 'Browse all programmes to see where each one leads. Your shortlist keeps saved routes and next steps for applying.',
   },
+  MENU_STEP,
+  HELP_STEP,
 ];
 
 const ADVISOR_STEPS = [
   {
-    title: 'Welcome, Prof. Rossi',
-    body: 'This is the Advisor workspace. You review and approve your students\' study plans here. Plans are read-only for you: only the student can add or drop courses.',
-  },
-  {
-    target: 'advisee-stats',
     tab: 'advisees',
-    title: 'Your advisees at a glance',
-    body: 'See how many plans are waiting for your review and which ones have critical issues.',
+    title: 'Welcome, Prof. Rossi',
+    body: "This is the advisor workspace. Review and approve your students' plans here. Plans are read-only for you.",
   },
   {
     target: 'advisees',
     tab: 'advisees',
-    title: 'Student list',
-    body: "Alex's row is live and updates as Alex edits the plan. Use Review plan to open it. The other students are sample records.",
+    title: 'Your students',
+    body: "Alex's row is live and updates as Alex edits the plan. Open it with Review plan. The others are sample records.",
   },
   {
     target: 'review-findings',
     tab: 'review',
-    title: 'Agent findings',
-    body: 'The same agents that guide the student flag clashes, missing prerequisites and credit problems for you.',
-  },
-  {
-    target: 'review-calendar',
-    tab: 'review',
-    title: "The student's week",
-    body: 'A read-only view of the timetable, with overlaps flashing red.',
+    title: 'Findings',
+    body: 'Clashes, missing prerequisites and credit problems are flagged for you automatically.',
   },
   {
     target: 'review-decision',
     tab: 'review',
     title: 'Approve or request changes',
-    body: 'Leave feedback for Alex, request changes, or approve the plan. Approval is only possible once Alex has submitted the plan and it has no overlaps. Approving confirms every course.',
+    body: 'Leave feedback, request changes, or approve. You can only approve a plan that has been submitted and has no clashes.',
   },
-  {
-    target: 'tabs',
-    tab: 'review',
-    title: 'Course catalogue for reference',
-    body: 'Browse the catalogue, compare courses and read syllabi while advising. It is read-only in this workspace.',
-  },
-  {
-    target: 'a11y',
-    title: 'Display & accessibility',
-    body: 'Switch to dark mode, a colour-blind friendly palette with patterns, larger text, high contrast, reduced motion or a more readable font. Settings are saved on this device.',
-  },
-  {
-    target: 'role',
-    title: 'Switch workspace',
-    body: 'Switch to the Student view to act as Alex (for example, to submit the plan), or to the Admin view. Tap Tour anytime to see this guide again.',
-  },
+  MENU_STEP,
+  HELP_STEP,
 ];
 
 const ADMIN_STEPS = [
   {
-    title: 'Department Admin workspace',
-    body: 'This is where the course catalogue is maintained. Everything students and advisors see comes from these records. Admins do not see or edit individual study plans.',
+    tab: 'courses',
+    title: 'Department workspace',
+    body: 'Maintain the course catalogue that students and advisors see. Individual study plans are not visible here.',
   },
   {
     target: 'ingest',
     tab: 'courses',
-    title: 'The Librarian',
-    body: 'Run the ingestion to read raw syllabus files. Clean records are published to the catalogue straight away. Broken ones are held back with the reason, such as a missing timetable slot.',
-  },
-  {
-    target: 'course-table',
-    tab: 'courses',
-    title: 'Course records',
-    body: 'Every course with its schedule, room, prerequisites and source. Courses that share a time slot with another course are flagged. Drag the edge of any column header to resize it.',
+    title: 'Import course data',
+    body: 'Import raw syllabus files. Clean records are published straight away. Broken ones are held back with the reason.',
   },
   {
     target: 'dept-timetable',
     tab: 'timetable',
     title: 'Department timetable',
-    body: 'All courses on one week. Red zones show slots where two courses run at the same time, so you can spot clashes before students run into them.',
+    body: 'All courses on one week. Red zones show courses scheduled at the same time.',
   },
   {
-    target: 'a11y',
-    title: 'Display & accessibility',
-    body: 'Switch to dark mode, a colour-blind friendly palette with patterns, larger text, high contrast, reduced motion or a more readable font. Settings are saved on this device.',
+    target: 'reports',
+    tab: 'reports',
+    title: 'Reports & feedback',
+    body: 'Bug reports and messages from any user arrive here. Mark them resolved when fixed.',
   },
-  {
-    target: 'role',
-    title: 'Switch workspace',
-    body: 'Switch to the Student or Advisor views to see the other side of the system. Tap Tour anytime to see this guide again.',
-  },
+  MENU_STEP,
+  HELP_STEP,
 ];
 
-export const TOUR_STEPS = { student: STUDENT_STEPS, advisor: ADVISOR_STEPS, admin: ADMIN_STEPS };
+export const TOUR_STEPS = { newcomer: NEWCOMER_STEPS, student: STUDENT_STEPS, advisor: ADVISOR_STEPS, admin: ADMIN_STEPS };
 
 const GAP = 12;
 const MARGIN = 16;

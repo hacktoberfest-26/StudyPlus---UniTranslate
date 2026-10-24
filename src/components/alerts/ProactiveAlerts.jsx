@@ -97,7 +97,7 @@ export function ProactiveAlerts() {
   // On wide screens the panel sticks below the tab bar while the page scrolls, and its width can be dragged.
   return (
     <aside
-      aria-label="H-OS Agent Alerts"
+      aria-label="Plan alerts"
       data-tour="alerts"
       style={{ '--alerts-w': `${width}px` }}
       className="relative lg:w-(--alerts-w) shrink-0 bg-white border-b lg:border-b-0 lg:border-r border-slate-200 flex flex-col lg:sticky lg:top-(--sticky-top) lg:max-h-[calc(100vh-var(--sticky-top))]"
@@ -121,8 +121,8 @@ export function ProactiveAlerts() {
             {critical ? <TriangleAlert className="w-5 h-5 text-white" aria-hidden /> : <ShieldCheck className="w-5 h-5 text-white" aria-hidden />}
           </div>
           <div>
-            <h3 className={`font-semibold ${critical ? 'text-red-900' : 'text-slate-900'}`}>H-OS Agent Alerts</h3>
-            <p className="text-xs text-slate-500">Management by exception · live</p>
+            <h3 className={`font-semibold ${critical ? 'text-red-900' : 'text-slate-900'}`}>Plan alerts</h3>
+            <p className="text-xs text-slate-500">Checked automatically as you plan</p>
           </div>
           {actionable > 0 && (
             <span className={`ml-auto text-xs text-white px-2 py-0.5 rounded-full ${critical ? 'bg-red-600' : 'bg-amber-700'}`}>
