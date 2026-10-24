@@ -15,6 +15,7 @@ export function CourseCard({ course }) {
   const toggleCompare = usePlanStore((s) => s.toggleCompare);
   const openSyllabus = usePlanStore((s) => s.openSyllabus);
   const comparing = usePlanStore((s) => s.compareCodes.includes(course.code));
+  const canEdit = usePlanStore((s) => s.role === 'student');
 
   const entry = planCourses.find((c) => c.code === course.code);
   const clashes = conflictsWith(course, planCourses);
@@ -78,8 +79,8 @@ export function CourseCard({ course }) {
         <ExternalLink className="w-3.5 h-3.5" aria-hidden /> Official Syllabus
       </button>
 
-      <div className="mt-auto grid grid-cols-3 gap-2">
-        {entry ? (
+      <div className={`mt-auto grid gap-2 ${canEdit ? 'grid-cols-3' : 'grid-cols-1'}`}>
+        {!canEdit ? null : entry ? (
           <button
             onClick={() => removeCourse(course.code)}
             className="inline-flex items-center justify-center gap-1 bg-blue-50 border border-blue-300 text-blue-700 hover:bg-red-50 hover:border-red-300 hover:text-red-700 text-xs sm:text-sm font-medium py-2 px-2 rounded-lg transition-colors"
@@ -95,12 +96,14 @@ export function CourseCard({ course }) {
             <Plus className="w-4 h-4" aria-hidden /> Add to Draft
           </button>
         )}
+        {canEdit && (
         <button
           onClick={() => previewCourse(course.code)}
           className="inline-flex items-center justify-center gap-1 border border-slate-300 hover:bg-slate-50 text-slate-700 text-xs sm:text-sm font-medium py-2 px-2 rounded-lg transition-colors"
         >
           <Eye className="w-4 h-4" aria-hidden /> Preview
         </button>
+        )}
         <button
           onClick={() => toggleCompare(course.code)}
           aria-pressed={comparing}

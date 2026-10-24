@@ -39,3 +39,10 @@ export const ROLES = {
   advisor: { label: '👨‍🏫 Academic Advisor (Prof. Rossi)', short: 'Advisor' },
   admin: { label: '🏛️ Department Admin', short: 'Admin' },
 };
+
+/** Other advisees of Prof. Rossi — static sample records to populate the advisor dashboard. */
+export const SAMPLE_ADVISEES = [
+  { id: 'stu-giulia', name: 'Giulia Bianco', track: 'Digital Marketing', completed: 126, planned: 30, status: 'approved', critical: 0, warnings: 0 },
+  { id: 'stu-marco', name: 'Marco Testa', track: 'AI/Data', completed: 98, planned: 33, status: 'submitted', critical: 1, warnings: 1 },
+  { id: 'stu-sara', name: 'Sara Lombardi', track: 'FinTech', completed: 140, planned: 24, status: 'draft', critical: 0, warnings: 1 },
+];

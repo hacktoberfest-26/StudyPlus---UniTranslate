@@ -5,12 +5,16 @@
 import { create } from 'zustand';
 import { persist, createJSONStorage } from 'zustand/middleware';
 import { BRAIN_COURSES } from '../brain/courses.js';
-import { INITIAL_PLAN, STUDENT } from '../brain/student.js';
+import { INITIAL_PLAN, STUDENT, ROLES } from '../brain/student.js';
+
+/** The view each role lands on. */
+export const DEFAULT_TAB = { student: 'catalog', advisor: 'advisees', admin: 'courses' };
 import { RAW_SYLLABUS_FEED } from '../brain/rawFeed.js';
 import { normalizeCourse } from '../librarian/normalize.js';
 import { ingestFeed } from '../librarian/ingest.js';
 import { tutorRespond } from '../agents/tutorEngine.js';
 import { assessChange } from '../agents/impact.js';
+import { runProactiveAgents } from '../agents/proactiveAgent.js';
 
 const initialCatalog = () => BRAIN_COURSES.map((raw) => normalizeCourse(raw).course);
 
@@ -38,8 +42,9 @@ const initialState = () => ({
   typing: false,
   toasts: [],
   pendingChange: null,
-  tourDone: false,
+  toursDone: {},
   tourStep: null,
+  reviewLog: [],
 });
 
 export const usePlanStore = create(
@@ -101,15 +106,43 @@ export const usePlanStore = create(
         set({ pendingChange: { change, effects } });
       };
 
+      /**
+       * Each role only gets its own actions: the plan belongs to the student, the
+       * decision to the advisor and the catalogue data to the admin.
+       */
+      const allowed = (role, what) => {
+        if (get().role === role) return true;
+        toast(`Only the ${ROLES[role].short.toLowerCase()} can ${what}.`, 'warning');
+        return false;
+      };
+      const hasCritical = () =>
+        runProactiveAgents({ plan: get().plan, catalog: get().catalog, student: STUDENT }).some((a) => a.severity === 'critical');
+      const logReview = (action, note) =>
+        set((s) => ({ reviewLog: [...s.reviewLog, { id: nextId(), at: new Date().toISOString(), action, note: note || null }] }));
+
       return {
         ...initialState(),
         toast,
 
-        setRole: (role) => set({ role }),
+        setRole: (role) => {
+          set({
+            role,
+            activeTab: DEFAULT_TAB[role],
+            chatOpen: false,
+            compareOpen: false,
+            compareCodes: [],
+            pendingChange: null,
+            ghostCode: null,
+            hoverGhostCode: null,
+          });
+          // Each interface has its own short tour the first time it is opened.
+          if (!get().toursDone[role]) get().startTour();
+        },
         setTab: (activeTab) => set({ activeTab }),
         setScheduleMode: (scheduleMode) => set({ scheduleMode }),
 
         addCourse: (code) => {
+          if (!allowed('student', 'change the study plan')) return;
           const course = findCourse(code);
           if (!course) return;
           if (get().plan.some((p) => p.code === code)) {
@@ -120,6 +153,7 @@ export const usePlanStore = create(
         },
 
         addMany: (codes) => {
+          if (!allowed('student', 'change the study plan')) return;
           const fresh = codes.filter((code) => findCourse(code) && !get().plan.some((p) => p.code === code));
           if (!fresh.length) {
             toast('Those courses are already in your draft plan.');
@@ -129,10 +163,12 @@ export const usePlanStore = create(
         },
 
         removeCourse: (code) => {
+          if (!allowed('student', 'change the study plan')) return;
           if (findCourse(code)) proposeChange({ kind: 'remove', codes: [code] });
         },
 
         swapCourse: (dropCode, addCode) => {
+          if (!allowed('student', 'change the study plan')) return;
           if (findCourse(dropCode) && findCourse(addCode)) proposeChange({ kind: 'swap', codes: [dropCode, addCode] });
         },
 
@@ -145,7 +181,8 @@ export const usePlanStore = create(
 
         startTour: () => set({ tourStep: 0, chatOpen: false, compareOpen: false, syllabusCode: null }),
         setTourStep: (tourStep) => set({ tourStep }),
-        endTour: () => set({ tourStep: null, tourDone: true, activeTab: 'catalog' }),
+        endTour: () =>
+          set((s) => ({ tourStep: null, toursDone: { ...s.toursDone, [s.role]: true }, activeTab: DEFAULT_TAB[s.role] })),
 
         previewCourse: (code) => {
           set({ ghostCode: code, activeTab: 'schedule', scheduleMode: 'draft', chatOpen: false, compareOpen: false });
@@ -171,10 +208,22 @@ export const usePlanStore = create(
         closeSyllabus: () => set({ syllabusCode: null }),
 
         submitDraft: () => {
+          if (!allowed('student', 'submit the plan')) return;
+          if (hasCritical()) {
+            toast('Resolve the timetable overlap before submitting.', 'warning');
+            return;
+          }
+          logReview('submitted');
           set({ submission: 'submitted', advisorNote: null, lastSavedAt: new Date().toISOString() });
           toast('Draft submitted to Prof. Rossi for review.', 'success');
         },
-        approveDraft: () => {
+        approveDraft: (note) => {
+          if (!allowed('advisor', 'approve a plan')) return;
+          if (get().submission !== 'submitted' || hasCritical()) {
+            toast('Only a submitted plan without timetable overlaps can be approved.', 'warning');
+            return;
+          }
+          logReview('approved', note);
           set((s) => ({
             plan: s.plan.map((p) => ({ ...p, status: 'confirmed' })),
             submission: 'approved',
@@ -184,11 +233,14 @@ export const usePlanStore = create(
           toast('Draft approved — all courses are now confirmed.', 'success');
         },
         requestChanges: (note) => {
+          if (!allowed('advisor', 'request changes')) return;
+          logReview('changes', note || 'Please revise your draft plan.');
           set({ submission: 'changes', advisorNote: note || 'Please revise your draft plan.' });
           toast('Change request sent to Alex.');
         },
 
         runIngest: () => {
+          if (!allowed('admin', 'run the Librarian ingestion')) return;
           const report = ingestFeed(RAW_SYLLABUS_FEED, get().catalog.map((c) => c.code));
           const published = report.filter((r) => r.publishable).map((r) => r.course);
           set((s) => ({ ingestReport: report, catalog: [...s.catalog, ...published] }));
@@ -220,6 +272,7 @@ export const usePlanStore = create(
 
         /** Ask the tutor from anywhere in the app (alerts, skill tree…). */
         askTutor: (prompt) => {
+          if (get().role !== 'student') return;
           if (get().activeTab !== 'advisor') set({ chatOpen: true });
           get().sendChat(prompt);
         },
@@ -243,7 +296,7 @@ export const usePlanStore = create(
         },
 
         resetDemo: () => {
-          set({ ...initialState(), role: get().role, tourDone: get().tourDone });
+          set({ ...initialState(), role: get().role, activeTab: DEFAULT_TAB[get().role], toursDone: get().toursDone });
           toast('Demo data reset.');
         },
       };
@@ -259,8 +312,18 @@ export const usePlanStore = create(
         advisorNote: s.advisorNote,
         lastSavedAt: s.lastSavedAt,
         ingestReport: s.ingestReport,
-        tourDone: s.tourDone,
+        toursDone: s.toursDone,
+        reviewLog: s.reviewLog,
       }),
+      version: 1,
+      // v0 stored a single `tourDone` flag for the (then only) student tour.
+      migrate: (state, version) => {
+        if (version === 0 && state) {
+          state.toursDone = { student: !!state.tourDone };
+          delete state.tourDone;
+        }
+        return state;
+      },
     },
   ),
 );

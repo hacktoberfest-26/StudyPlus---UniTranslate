@@ -26,10 +26,10 @@ npm run build    # production bundle in dist/
 ## Features
 
 - **Global header**: role switcher (🎓 Student · 👨‍🏫 Advisor · 🏛️ Admin), auto-save banner with submission status, and a 3-year progress bar split into Core / Electives / Thesis, with striped segments for credits planned this semester.
-- **Role workflows**
-  - *Student*: submit the draft to the advisor. Submission is blocked while a critical alert is open.
-  - *Advisor*: review the draft, request changes with a note, or approve it (approval confirms every draft course).
-  - *Admin*: Librarian console with Brain health stats and one-click ingestion of a messy syllabus feed. Clean records are published to the catalogue; broken ones are quarantined with the reason.
+- **Three separate workspaces** (switch with *View as*). Each has its own views, colour, header and guided tour, and permissions are enforced in the store, not just hidden in the UI.
+  - *Student (Alex)*: the only role that can change the plan. Uses the four planning views below and submits the plan once it has no overlaps.
+  - *Academic Advisor (Prof. Rossi)*: **My Advisees** dashboard (Alex live, plus sample students); **Plan Review** with agent findings, the course list, a read-only timetable, feedback, approve or request changes, and a review history; **Course Catalogue** read-only. A plan can only be approved after it is submitted and has no overlaps.
+  - *Department Admin*: **Course Data & Librarian**, with the ingestion pipeline and the full course records table; **Department Timetable**, with every course on one week and slot clashes listed. No access to individual study plans.
 - **Non-dismissable agent alert panel**: overlap alerts have no close control. They disappear only when the conflict is resolved, e.g. via **⚡ Apply Smart Recommendation**, which swaps in the best-ranked non-overlapping elective. On mobile, critical alerts also stay pinned at the top of the screen.
 - **Tab 1 · Course Catalogue**: search plus filters for campus, format, CFU and schedule days. Course cards show code, lecturer, schedule, attendance tag, an official syllabus modal, inline clash and prerequisite badges, and Add / Preview / Compare buttons. Comparing 2–3 courses opens a matrix of CFU, workload, review score, schedule, conflicts with the draft, prerequisites and assessment.
 - **Tab 2 · Ghost Calendar**: a Mon–Fri 08:00–18:00 grid with colour-coded blocks.

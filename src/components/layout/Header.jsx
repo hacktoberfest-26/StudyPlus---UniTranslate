@@ -1,6 +1,13 @@
-import { GraduationCap, CircleCheck, ChevronDown, RotateCcw, CircleHelp } from 'lucide-react';
+import { GraduationCap, CircleCheck, ChevronDown, RotateCcw, CircleHelp, ClipboardCheck, Database } from 'lucide-react';
 import { usePlanStore } from '../../store/usePlanStore.js';
 import { ROLES } from '../../brain/student.js';
+
+/** Visual identity of each role's workspace, so the three interfaces are easy to tell apart. */
+const WORKSPACES = {
+  student: { title: 'Student workspace · Alex', logo: 'from-blue-600 to-indigo-600', Icon: GraduationCap },
+  advisor: { title: 'Advisor workspace · Prof. Rossi', logo: 'from-emerald-600 to-teal-600', Icon: ClipboardCheck },
+  admin: { title: 'Admin workspace · Department office', logo: 'from-slate-700 to-slate-900', Icon: Database },
+};
 
 const SUBMISSION_LABELS = {
   draft: { label: 'Active Draft', className: 'text-blue-600' },
@@ -22,26 +29,31 @@ export function Header() {
   const resetDemo = usePlanStore((s) => s.resetDemo);
   const startTour = usePlanStore((s) => s.startTour);
   const status = SUBMISSION_LABELS[submission];
+  const catalogSize = usePlanStore((s) => s.catalog.length);
+  const ingested = usePlanStore((s) => !!s.ingestReport);
+  const workspace = WORKSPACES[role];
 
   return (
     <div className="px-4 sm:px-6 pt-4">
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
         <div className="flex items-center gap-3 min-w-0">
-          <div className="w-10 h-10 shrink-0 bg-gradient-to-br from-blue-600 to-indigo-600 rounded-lg flex items-center justify-center">
-            <GraduationCap className="w-6 h-6 text-white" aria-hidden />
+          <div className={`w-10 h-10 shrink-0 bg-gradient-to-br ${workspace.logo} rounded-lg flex items-center justify-center`}>
+            <workspace.Icon className="w-6 h-6 text-white" aria-hidden />
           </div>
           <div className="min-w-0">
             <h1 className="text-lg sm:text-xl font-bold text-slate-900 leading-tight">
               StudyPlus UniTranslate <span className="font-medium text-slate-500">(H-OS Academic Module)</span>
             </h1>
-            <p className="text-xs text-slate-500">Brain · Librarian · Proactive Agents</p>
+            <p className="text-xs font-medium text-slate-500">{workspace.title}</p>
           </div>
         </div>
 
         <div className="flex items-center gap-2">
-          <label className="relative" data-tour="role">
-            <span className="sr-only">Switch role</span>
+          <label className="relative flex items-center gap-2" data-tour="role">
+            <span className="hidden md:inline whitespace-nowrap text-xs font-medium text-slate-500">View as</span>
             <select
+              id="role-switcher"
+              aria-label="View as"
               value={role}
               onChange={(e) => setRole(e.target.value)}
               className="appearance-none bg-slate-100 border border-slate-300 rounded-lg pl-3 pr-9 py-2 text-sm font-medium text-slate-700 focus:outline-none focus:ring-2 focus:ring-blue-500 cursor-pointer"
@@ -76,9 +88,22 @@ export function Header() {
 
       <div data-tour="autosave" className="mt-3 flex items-center gap-2 text-xs sm:text-sm text-slate-600 bg-slate-50 border border-slate-200 px-3 py-2 rounded-lg" role="status">
         <CircleCheck className="w-4 h-4 text-green-600 shrink-0" aria-hidden />
-        <span>
-          Draft saved automatically at {formatSavedAt(lastSavedAt)} • Status: <span className={`font-semibold ${status.className}`}>{status.label}</span>
-        </span>
+        {role === 'student' && (
+          <span>
+            Draft saved automatically at {formatSavedAt(lastSavedAt)} • Status: <span className={`font-semibold ${status.className}`}>{status.label}</span>
+          </span>
+        )}
+        {role === 'advisor' && (
+          <span>
+            {submission === 'submitted' ? '1 plan awaiting your review' : 'No plans awaiting your review'} • Alex's plan:{' '}
+            <span className={`font-semibold ${status.className}`}>{status.label}</span>
+          </span>
+        )}
+        {role === 'admin' && (
+          <span>
+            {catalogSize} courses in the Brain • Librarian ingestion: <span className="font-semibold text-slate-800">{ingested ? 'feed processed' : '3 records waiting'}</span>
+          </span>
+        )}
       </div>
     </div>
   );

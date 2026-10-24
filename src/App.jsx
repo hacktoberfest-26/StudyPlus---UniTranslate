@@ -14,12 +14,25 @@ import { SkillTree } from './components/skills/SkillTree.jsx';
 import { AdvisorChatbot, ChatDrawer } from './components/chat/AdvisorChatbot.jsx';
 import { ConfirmChangeDialog } from './components/alerts/ConfirmChangeDialog.jsx';
 import { GuidedTour } from './components/tour/GuidedTour.jsx';
+import { AdviseesDashboard } from './components/advisor/AdviseesDashboard.jsx';
+import { PlanReview } from './components/advisor/PlanReview.jsx';
+import { CourseDataAdmin } from './components/admin/CourseDataAdmin.jsx';
+import { DepartmentTimetable } from './components/admin/DepartmentTimetable.jsx';
+import { useActiveTab } from './components/layout/TabNav.jsx';
 
 const VIEWS = {
+  // Student
   catalog: CourseCatalogue,
   schedule: ScheduleCalendar,
   skills: SkillTree,
   advisor: AdvisorChatbot,
+  // Academic advisor
+  advisees: AdviseesDashboard,
+  review: PlanReview,
+  reference: CourseCatalogue,
+  // Department admin
+  courses: CourseDataAdmin,
+  timetable: DepartmentTimetable,
 };
 
 /** On small screens the alert panel scrolls away, so critical alerts are also pinned here. */
@@ -59,28 +72,30 @@ function Toasts() {
 }
 
 export default function App() {
-  const activeTab = usePlanStore((s) => s.activeTab);
+  const role = usePlanStore((s) => s.role);
+  const activeTab = useActiveTab();
   const View = VIEWS[activeTab];
-  const tourDone = usePlanStore((s) => s.tourDone);
+  const isStudent = role === 'student';
+  const tourSeen = usePlanStore((s) => !!s.toursDone[s.role]);
   const startTour = usePlanStore((s) => s.startTour);
 
-  // First visit: open the guided tour (it can be skipped on the first card).
+  // First visit to a workspace: open its guided tour (it can be skipped on the first card).
   useEffect(() => {
-    if (!tourDone) startTour();
+    if (!tourSeen) startTour();
   }, []); // eslint-disable-line react-hooks/exhaustive-deps
 
   return (
     <div className="min-h-screen lg:h-screen flex flex-col bg-slate-50 font-sans text-slate-900">
-      <MobileCriticalStrip />
+      {isStudent && <MobileCriticalStrip />}
       <header className="bg-white border-b border-slate-200 shrink-0">
         <Header />
-        <DegreeProgress />
-        <RoleContextBar />
+        {isStudent && <DegreeProgress />}
+        {isStudent ? <RoleContextBar /> : <div className="h-3" />}
         <TabNav />
       </header>
 
       <div className="flex-1 min-h-0 flex flex-col lg:flex-row">
-        <ProactiveAlerts />
+        {isStudent && <ProactiveAlerts />}
         <main
           key={activeTab}
           id={`view-${activeTab}`}
@@ -100,7 +115,7 @@ export default function App() {
 
       <ComparisonDrawer />
       <SyllabusModal />
-      <ChatDrawer />
+      {isStudent && <ChatDrawer />}
       <ConfirmChangeDialog />
       <GuidedTour />
       <Toasts />

@@ -12,6 +12,7 @@ export function CourseCatalogue() {
   const compareCodes = usePlanStore((s) => s.compareCodes);
   const openCompare = usePlanStore((s) => s.openCompare);
   const clearCompare = usePlanStore((s) => s.clearCompare);
+  const readOnly = usePlanStore((s) => s.role !== 'student');
 
   const [query, setQuery] = useState('');
   const [campus, setCampus] = useState('');
@@ -112,6 +113,11 @@ export function CourseCatalogue() {
         </div>
       </div>
 
+      {readOnly && (
+        <p className="bg-emerald-50 border-b border-emerald-200 text-emerald-900 text-xs px-4 py-2">
+          Read-only reference. Clash and prerequisite badges show how each course fits Alex's current plan. Only Alex can add or drop courses.
+        </p>
+      )}
       <div className="flex-1 overflow-y-auto scrollbar-thin p-4 sm:p-6">
         {filtered.length ? (
           <div className="grid grid-cols-1 md:grid-cols-2 2xl:grid-cols-3 gap-4">

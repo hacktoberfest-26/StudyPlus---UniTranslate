@@ -11,6 +11,7 @@ export function SyllabusModal() {
   const close = usePlanStore((s) => s.closeSyllabus);
   const askTutor = usePlanStore((s) => s.askTutor);
   const setTutorMode = usePlanStore((s) => s.setTutorMode);
+  const isStudent = usePlanStore((s) => s.role === 'student');
   const course = useCatalogIndex()[code];
   if (!course) return null;
 
@@ -60,6 +61,7 @@ export function SyllabusModal() {
             <dd>{course.attendance}</dd>
           </div>
         </dl>
+        {isStudent && (
         <button
           onClick={() => {
             close();
@@ -70,6 +72,7 @@ export function SyllabusModal() {
         >
           🤖 Ask the AI Tutor to explain this syllabus
         </button>
+        )}
       </div>
     </Modal>
   );

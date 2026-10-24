@@ -39,7 +39,8 @@ function actionClass(kind, primary) {
   return 'bg-white border border-slate-300 text-slate-700 hover:border-slate-400';
 }
 
-function AlertCard({ alert }) {
+/** One agent alert. `readOnly` hides the fix buttons (used in the advisor's review). */
+export function AlertCard({ alert, readOnly = false }) {
   const runAlertAction = usePlanStore((s) => s.runAlertAction);
   const style = STYLES[alert.severity];
   const { Icon } = style;
@@ -54,9 +55,11 @@ function AlertCard({ alert }) {
           <h4 className={`text-sm ${style.title}`}>{alert.title}</h4>
           <p className={`text-xs mt-1 ${style.body}`}>{alert.message}</p>
           {alert.severity === 'critical' && (
-            <p className="text-[11px] text-red-700 mt-1 italic">This alert stays until the overlap is resolved.</p>
+            <p className="text-[11px] text-red-700 mt-1 italic">
+              {readOnly ? 'The plan cannot be approved while this overlap remains.' : 'This alert stays until the overlap is resolved.'}
+            </p>
           )}
-          {alert.actions.length > 0 && (
+          {!readOnly && alert.actions.length > 0 && (
             <div className="mt-2 flex flex-wrap gap-2">
               {alert.actions.map((action, i) => (
                 <button

@@ -6,7 +6,7 @@ import { usePlanStore } from '../../store/usePlanStore.js';
  * Steps of the first-visit tour. `target` is a [data-tour] anchor; `tab` and
  * `scheduleMode` put the app in the right state before the step is shown.
  */
-export const TOUR_STEPS = [
+const STUDENT_STEPS = [
   {
     title: 'Welcome to StudyPlus UniTranslate',
     body: "This short tour (about 2 minutes) shows how to plan your semester: browse courses, test them on your timetable, follow your career path and get help from the AI tutor. Skip it if you already know your way around. You can restart it anytime from the Tour button.",
@@ -14,7 +14,7 @@ export const TOUR_STEPS = [
   {
     target: 'role',
     title: 'Switch roles',
-    body: 'See the same plan as a Student, as the Academic Advisor reviewing it, or as the Department Admin managing course data.',
+    body: 'This demo has three separate workspaces. You are in the Student workspace, where you build your plan. Switch here to see the Academic Advisor who reviews it, or the Department Admin who manages course data.',
   },
   {
     target: 'autosave',
@@ -100,6 +100,86 @@ export const TOUR_STEPS = [
   },
 ];
 
+const ADVISOR_STEPS = [
+  {
+    title: 'Welcome, Prof. Rossi',
+    body: 'This is the Advisor workspace. You review and approve your students\' study plans here. Plans are read-only for you: only the student can add or drop courses.',
+  },
+  {
+    target: 'advisee-stats',
+    tab: 'advisees',
+    title: 'Your advisees at a glance',
+    body: 'See how many plans are waiting for your review and which ones have critical issues.',
+  },
+  {
+    target: 'advisees',
+    tab: 'advisees',
+    title: 'Student list',
+    body: "Alex's row is live and updates as Alex edits the plan. Use Review plan to open it. The other students are sample records.",
+  },
+  {
+    target: 'review-findings',
+    tab: 'review',
+    title: 'Agent findings',
+    body: 'The same agents that guide the student flag clashes, missing prerequisites and credit problems for you.',
+  },
+  {
+    target: 'review-calendar',
+    tab: 'review',
+    title: "The student's week",
+    body: 'A read-only view of the timetable, with overlaps flashing red.',
+  },
+  {
+    target: 'review-decision',
+    tab: 'review',
+    title: 'Approve or request changes',
+    body: 'Leave feedback for Alex, request changes, or approve the plan. Approval is only possible once Alex has submitted the plan and it has no overlaps. Approving confirms every course.',
+  },
+  {
+    target: 'tabs',
+    tab: 'review',
+    title: 'Course catalogue for reference',
+    body: 'Browse the catalogue, compare courses and read syllabi while advising. It is read-only in this workspace.',
+  },
+  {
+    target: 'role',
+    title: 'Switch workspace',
+    body: 'Switch to the Student view to act as Alex (for example, to submit the plan), or to the Admin view. Tap Tour anytime to see this guide again.',
+  },
+];
+
+const ADMIN_STEPS = [
+  {
+    title: 'Department Admin workspace',
+    body: 'This is where the course catalogue is maintained. Everything students and advisors see comes from these records. Admins do not see or edit individual study plans.',
+  },
+  {
+    target: 'ingest',
+    tab: 'courses',
+    title: 'The Librarian',
+    body: 'Run the ingestion to read raw syllabus files. Clean records are published to the catalogue straight away. Broken ones are held back with the reason, such as a missing timetable slot.',
+  },
+  {
+    target: 'course-table',
+    tab: 'courses',
+    title: 'Course records',
+    body: 'Every course with its schedule, room, prerequisites and source. Courses that share a time slot with another course are flagged.',
+  },
+  {
+    target: 'dept-timetable',
+    tab: 'timetable',
+    title: 'Department timetable',
+    body: 'All courses on one week. Red zones show slots where two courses run at the same time, so you can spot clashes before students run into them.',
+  },
+  {
+    target: 'role',
+    title: 'Switch workspace',
+    body: 'Switch to the Student or Advisor views to see the other side of the system. Tap Tour anytime to see this guide again.',
+  },
+];
+
+export const TOUR_STEPS = { student: STUDENT_STEPS, advisor: ADVISOR_STEPS, admin: ADMIN_STEPS };
+
 const GAP = 12;
 const MARGIN = 16;
 const PAD = 6;
@@ -124,6 +204,7 @@ export function GuidedTour() {
   const endTour = usePlanStore((s) => s.endTour);
   const setTab = usePlanStore((s) => s.setTab);
   const setScheduleMode = usePlanStore((s) => s.setScheduleMode);
+  const steps = TOUR_STEPS[usePlanStore((s) => s.role)];
 
   const [rect, setRect] = useState(null);
   const [card, setCard] = useState({ width: 360, height: 220 });
@@ -131,8 +212,8 @@ export function GuidedTour() {
   const cardRef = useRef(null);
   const nextRef = useRef(null);
 
-  const current = step != null ? TOUR_STEPS[step] : null;
-  const isLast = step === TOUR_STEPS.length - 1;
+  const current = step != null ? steps[step] : null;
+  const isLast = step === steps.length - 1;
 
   const measure = useCallback(() => {
     setViewport({ vw: window.innerWidth, vh: window.innerHeight });
@@ -188,7 +269,7 @@ export function GuidedTour() {
   const go = (delta) => {
     const next = step + delta;
     if (next < 0) return;
-    if (next >= TOUR_STEPS.length) endTour();
+    if (next >= steps.length) endTour();
     else setTourStep(next);
   };
 
@@ -240,7 +321,7 @@ export function GuidedTour() {
         <div className="flex items-center justify-between mb-2">
           <span className="inline-flex items-center gap-1.5 text-xs font-semibold text-indigo-600">
             <Compass className="w-4 h-4" aria-hidden />
-            {step === 0 ? 'Guided tour' : `Step ${step} of ${TOUR_STEPS.length - 1}`}
+            {step === 0 ? 'Guided tour' : `Step ${step} of ${steps.length - 1}`}
           </span>
           <button onClick={endTour} className="p-1 rounded-md text-slate-400 hover:text-slate-700 hover:bg-slate-100" aria-label="Close tour">
             <X className="w-4 h-4" aria-hidden />
@@ -255,7 +336,7 @@ export function GuidedTour() {
 
         {step > 0 && (
           <div className="flex gap-1 mt-4" aria-hidden>
-            {TOUR_STEPS.slice(1).map((_, i) => (
+            {steps.slice(1).map((_, i) => (
               <span key={i} className={`h-1.5 flex-1 rounded-full ${i < step ? 'bg-indigo-500' : 'bg-slate-200'}`} />
             ))}
           </div>

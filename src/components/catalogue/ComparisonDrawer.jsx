@@ -14,6 +14,7 @@ export function ComparisonDrawer() {
   const closeCompare = usePlanStore((s) => s.closeCompare);
   const addCourse = usePlanStore((s) => s.addCourse);
   const previewCourse = usePlanStore((s) => s.previewCourse);
+  const canEdit = usePlanStore((s) => s.role === 'student');
   const index = useCatalogIndex();
   const planCourses = usePlanCourses();
 
@@ -46,7 +47,7 @@ export function ComparisonDrawer() {
     { label: 'Schedule', render: (c) => formatSchedule(c) },
     { label: 'Location & Format', render: (c) => `${CAMPUSES[c.campus]?.label} · ${FORMATS[c.format]}` },
     {
-      label: 'Conflicts with Draft',
+      label: canEdit ? 'Conflicts with Draft' : "Conflicts with Alex's plan",
       render: (c) => {
         if (planCourses.some((p) => p.code === c.code)) return <span className="text-blue-700">Already in plan</span>;
         const clashes = conflictsWith(c, planCourses);
@@ -111,6 +112,7 @@ export function ComparisonDrawer() {
                 ))}
               </tr>
             ))}
+            {canEdit && (
             <tr>
               <td />
               {courses.map((c) => (
@@ -126,6 +128,7 @@ export function ComparisonDrawer() {
                 </td>
               ))}
             </tr>
+            )}
           </tbody>
         </table>
       </div>
