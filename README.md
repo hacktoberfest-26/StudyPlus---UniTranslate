@@ -21,7 +21,7 @@ npm run build    # production bundle in dist/
 | **The Brain** (knowledge store) | `src/brain/` | Course syllabi & timetables, CFU buckets (180 total), student record (114 CFU), skill graph, career pathways, raw syllabus feed |
 | **The Librarian** | `src/librarian/` | Normalises course records into the Brain schema, parses unstructured syllabus text, flags or quarantines bad data, detects timetable overlaps |
 | **Proactive Agents** | `src/agents/proactiveAgent.js` | "Management by exception": re-runs on every draft change and emits critical (overlap), warning (prerequisite, missing compulsory, credit shortage/overload) and success (smart alternative) alerts |
-| **Tutor** | `src/agents/tutorEngine.js` | Planner / concept tutor over live Brain + plan state. Deterministic rules today; Gemma 4 replaces it behind the same interface (see below) |
+| **Tutor** | `src/agents/tutorEngine.js` | Planner / concept tutor over live Brain + plan state, using deterministic rules (an open-weight model is a future step, see below) |
 | **State** | `src/store/` | Zustand store (persisted "auto-save") + memoised derived hooks shared by every view |
 
 ## For judges: H-OS mapping, what is real, and what is next
@@ -41,30 +41,60 @@ npm run build    # production bundle in dist/
 | Real (working code, unit-tested) | Mocked or planned |
 | --- | --- |
 | Clash detection, prerequisite checks, credit buckets, smart-swap ranking, impact preview | Course and student data are **illustrative samples**, not official university data |
-| Librarian normalisation, validation, quarantine and duplicate detection on 3 messy records | PDF reading: the feed is pre-extracted text. Gemma 4 does the PDF → JSON step in the roadmap |
+| Librarian normalisation, validation, quarantine and duplicate detection on 3 messy records | PDF reading: the feed is pre-extracted text |
 | Four role workspaces with permissions enforced in the store (19 unit tests) | Sign-in is local: no real accounts or server |
-| Ghost calendar, skill tree and career routes generated from the Brain | Tutor answers come from deterministic rules, not an LLM yet |
+| Ghost calendar, skill tree and career routes generated from the Brain | Tutor answers come from deterministic rules, not a language model |
 | Everything runs in the browser and nothing leaves the device | Notifications, calendar sync, language and data export are labelled placeholders |
 | WCAG 2 A/AA clean (axe-core) in light, dark, colour-blind and high-contrast modes | Application and live chat flows stop at a "prototype" message |
 
-### Gemma 4 integration plan (open weights, on-device)
+### Future step: Gemma 4 (not part of the prototype)
 
-The code already has the two seams where Gemma 4 plugs in, and the rest of the app does not change:
+The prototype contains no language model. The code is built so one can be added later at two points, without changing the rest of the app:
 
-1. **Librarian → `ingestFeed()`**: Gemma 4 reads a syllabus PDF or page (text and images) and returns the raw course object. `normalizeCourse()` stays as the **schema guard**, so a hallucinated or incomplete answer is quarantined, never published.
-2. **Tutor → `tutorRespond(message, ctx)`**: Gemma 4 answers in plain language. It calls the same deterministic functions (`rankCandidates`, `findFillers`, `prerequisiteStatus`) as tools and returns the same `{ text, cards, bulkAdd }` shape. The safety-critical alerts stay deterministic.
-3. **Privacy**: the student record and career goals never leave the device, because a small Gemma 4 edge model runs locally (in the browser or a local runtime).
+1. **Librarian → `ingestFeed()`**: an open-weight model such as Gemma 4 reads syllabus PDFs and pages (text and images) and returns the raw course object. `normalizeCourse()` stays as the **schema guard**, so a wrong or incomplete answer is quarantined, never published.
+2. **Tutor → `tutorRespond(message, ctx)`**: the model answers in plain language. It uses the same deterministic planning functions (`rankCandidates`, `findFillers`, `prerequisiteStatus`) and returns the same `{ text, cards, bulkAdd }` shape. Clash and prerequisite alerts stay deterministic.
+3. **Privacy**: a small edge model running on the student's device would keep records and career goals local.
 
 ### Getting data when universities don't cooperate
 
 UniTranslate works **alongside** official systems. It never replaces them: enrolment still happens on the university portal, and UniTranslate links back to it.
 
-1. **Public data first**: catalogues, syllabi and timetables are usually published as web pages and PDFs. The Librarian ingests them with Gemma 4 and keeps the source URL and retrieval date on every record. Records that fail validation are quarantined.
-2. **Student-held data, on-device**: students import their own timetable export (ICS), study-plan PDF or transcript. Gemma 4 reads it locally, and it is never uploaded.
+1. **Public data first**: catalogues, syllabi and timetables are usually published as web pages and PDFs. The Librarian ingests them and keeps the source URL and retrieval date on every record. Records that fail validation are quarantined.
+2. **Student-held data, on-device**: students import their own timetable export (ICS), study-plan PDF or transcript. It is read locally and never uploaded.
 3. **Community corrections**: "Report a bug" already sends corrections with a reference number to a moderation inbox. Agreeing reports from several students raise confidence in a record.
 4. **Bottom-up partners**: student associations, individual departments and advisors. The advisor workspace works without central IT.
 5. **Open schema**: once the course schema is public, a university can publish its own feed and replace the scraping. The schema is designed to align with existing exchange efforts such as Erasmus Without Paper.
 
+## Limitations and how we plan to address them
+
+### Known limitations
+
+| Limitation | What it means | Planned answer |
+| --- | --- | --- |
+| **Dependence on university data** | Recommendations are only as good as the catalogue, timetable and rules behind them. Wrong or late data gives wrong advice. | Collaboration with universities for official feeds. Until then, public sources and quarantine of untrustworthy records (see above). |
+| **No official decision-making** | UniTranslate advises. It cannot enrol a student or grant an exception; only the university and the advisor can. | Collaboration with universities so that advisor approval in UniTranslate is recognised by the official process. Until then, every action links back to the official portal. |
+| **Limited initial coverage** | The first version covers one pilot (one campus, a few programmes), not every university. | Grow programme by programme with the open schema, starting where students and departments are willing. |
+| **Open source still needs resources** | Code is free, but hosting, data upkeep and moderation take people and time. | Student volunteers (contributions recognised as internships or extra-curricular credit), with clear documentation and tests so newcomers can help safely. |
+| **The benefit is not yet validated** | We believe it reduces clashes and late changes, but we have not measured it with real students. | A pilot semester comparing clash rate, plan changes after the deadline, and advisor time per plan, with and without the tool. |
+| **The smart function can weaken the student's chosen pathway** | A "Smart Recommendation" optimises for no clash and good fit. It can quietly swap a course the student wanted for their own reasons. | The swap already asks for confirmation and lists what is lost, including career skills. Future work: explain *why* each suggestion is made, offer several alternatives instead of one, and let the student mark a course as "keep: my choice" so agents never suggest dropping it. |
+
+### Other risks we identified
+
+| Risk | Suggested future solution (within the Brain / Librarian / Agents design) |
+| --- | --- |
+| **Stale data**: a timetable changes after students have planned | Librarian re-checks sources on a schedule and shows a "last verified" date on each course. When a source changes, agents raise an alert for every affected student. |
+| **Extraction errors** from automatic reading of PDFs | Every record passes the schema guard. Low-confidence or invalid records are quarantined for human review in the admin inbox, never shown to students. |
+| **Privacy of student records** | Process personal data on the device, store only what is needed, and ask for explicit consent before any sharing with an advisor. |
+| **Over-trust in automatic advice** | Agents explain their reasoning, never act without confirmation, and point to the advisor for decisions that matter. |
+| **Complex or exceptional rules** (transfers, Erasmus credits, part-time students) | Rules are stored as data in the Brain rather than in code, and advisors can record approved exceptions so agents respect them. |
+| **Bias in recommendations** (towards popular courses or high-salary careers) | Show the ranking factors openly, keep the logic open source so it can be audited, and let students choose what matters to them. |
+| **Unreliable career data** (salaries, demand) | Use dated, cited labour-market sources and label figures as estimates. Prototype figures are illustrative. |
+| **Language and access barriers** | Accessibility is already WCAG 2 A/AA tested. Next: Italian and other languages, and lightweight pages for older devices. |
+| **No real authentication** | Connect to the university's single sign-on, so no new passwords are created and roles come from official records. |
+| **Legal limits on collecting data** | Only public pages, respecting robots.txt and site terms, with attribution and source links. Never log in on a student's behalf or enrol automatically. |
+| **Project continuity** when volunteers change | Modular layers, unit tests and accessibility checks in the repository, plus contribution guides, so new volunteers can take over safely. |
+
+## Features
 
 - **Sign in first**: the sign-in / create-account page asks *who you are* (future student, current student, academic advisor, department staff), so each person lands straight in their own workspace. Demo accounts are pre-filled; nothing leaves the device.
 - **Four workspaces**, each with its own views, colour and guided tour. Permissions are enforced in the store, not just hidden in the UI:
@@ -139,8 +169,4 @@ src/
     ui/         primitives (Stars, TypeChip, RichText, Modal) · resize (ResizableBox, ResizeHandle, ZoomControl)
 ```
 
-The tutor is a deterministic rule engine, so the demo works offline. See *Gemma 4 integration plan* above for how a model replaces it.
-
-## Licence
-
-Open source under the MIT licence. See [LICENSE](LICENSE).
+The tutor is a deterministic rule engine, so the demo works offline. See *Future step: Gemma 4* above for how a model could replace it later.
