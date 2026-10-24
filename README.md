@@ -21,10 +21,50 @@ npm run build    # production bundle in dist/
 | **The Brain** (knowledge store) | `src/brain/` | Course syllabi & timetables, CFU buckets (180 total), student record (114 CFU), skill graph, career pathways, raw syllabus feed |
 | **The Librarian** | `src/librarian/` | Normalises course records into the Brain schema, parses unstructured syllabus text, flags or quarantines bad data, detects timetable overlaps |
 | **Proactive Agents** | `src/agents/proactiveAgent.js` | "Management by exception": re-runs on every draft change and emits critical (overlap), warning (prerequisite, missing compulsory, credit shortage/overload) and success (smart alternative) alerts |
-| **AI Tutor** | `src/agents/tutorEngine.js` | Context-aware planner / concept tutor, reasoning over live Brain + plan state |
+| **Tutor** | `src/agents/tutorEngine.js` | Planner / concept tutor over live Brain + plan state. Deterministic rules today; Gemma 4 replaces it behind the same interface (see below) |
 | **State** | `src/store/` | Zustand store (persisted "auto-save") + memoised derived hooks shared by every view |
 
-## Features
+## For judges: H-OS mapping, what is real, and what is next
+
+**Try it:** demo accounts are pre-filled on the sign-in page. Pick a role and tap *Sign in*.
+
+### The three H-OS layers in this codebase
+
+| H-OS layer | Where | How it works |
+| --- | --- | --- |
+| **Brain** | `src/brain/*.js` | One structured store with 10 courses (CFU, sessions, rooms, prerequisites, syllabus), the degree rules (180 CFU: 108 core / 60 electives / 12 thesis), the student record (114 CFU, passed skills, career goals), a 16-node skill graph and 7 career pathways across 7 programmes. |
+| **Librarian** | `src/librarian/` | `ingest.js` parses messy syllabus text. `normalize.js` turns it into the Brain schema: it fixes "six cfu" → 6 and "wed"/"Thursday" → day codes, maps campus and format aliases, and validates every record. Records that can't be trusted (e.g. no timetable slot) are **quarantined with a reason** instead of being published. `schedule.js` detects slot clashes. |
+| **Proactive agents** | `src/agents/` | **EVENT**: any change to the plan or the catalogue. **CONTEXT**: the catalogue, the student record and the draft plan. **REASONING**: clash detection, prerequisite status, credit totals, and ranking of replacement courses by bucket, career fit and reviews. **ACTION**: a non-dismissable alert with a one-click *Smart Recommendation* swap. An impact agent (`impact.js`) predicts the consequences before a change is applied. Critical alerts **block** submission and advisor approval in the store, not just in the UI. |
+
+### What is real vs. mocked in the prototype
+
+| Real (working code, unit-tested) | Mocked or planned |
+| --- | --- |
+| Clash detection, prerequisite checks, credit buckets, smart-swap ranking, impact preview | Course and student data are **illustrative samples**, not official university data |
+| Librarian normalisation, validation, quarantine and duplicate detection on 3 messy records | PDF reading: the feed is pre-extracted text. Gemma 4 does the PDF → JSON step in the roadmap |
+| Four role workspaces with permissions enforced in the store (19 unit tests) | Sign-in is local: no real accounts or server |
+| Ghost calendar, skill tree and career routes generated from the Brain | Tutor answers come from deterministic rules, not an LLM yet |
+| Everything runs in the browser and nothing leaves the device | Notifications, calendar sync, language and data export are labelled placeholders |
+| WCAG 2 A/AA clean (axe-core) in light, dark, colour-blind and high-contrast modes | Application and live chat flows stop at a "prototype" message |
+
+### Gemma 4 integration plan (open weights, on-device)
+
+The code already has the two seams where Gemma 4 plugs in, and the rest of the app does not change:
+
+1. **Librarian → `ingestFeed()`**: Gemma 4 reads a syllabus PDF or page (text and images) and returns the raw course object. `normalizeCourse()` stays as the **schema guard**, so a hallucinated or incomplete answer is quarantined, never published.
+2. **Tutor → `tutorRespond(message, ctx)`**: Gemma 4 answers in plain language. It calls the same deterministic functions (`rankCandidates`, `findFillers`, `prerequisiteStatus`) as tools and returns the same `{ text, cards, bulkAdd }` shape. The safety-critical alerts stay deterministic.
+3. **Privacy**: the student record and career goals never leave the device, because a small Gemma 4 edge model runs locally (in the browser or a local runtime).
+
+### Getting data when universities don't cooperate
+
+UniTranslate works **alongside** official systems. It never replaces them: enrolment still happens on the university portal, and UniTranslate links back to it.
+
+1. **Public data first**: catalogues, syllabi and timetables are usually published as web pages and PDFs. The Librarian ingests them with Gemma 4 and keeps the source URL and retrieval date on every record. Records that fail validation are quarantined.
+2. **Student-held data, on-device**: students import their own timetable export (ICS), study-plan PDF or transcript. Gemma 4 reads it locally, and it is never uploaded.
+3. **Community corrections**: "Report a bug" already sends corrections with a reference number to a moderation inbox. Agreeing reports from several students raise confidence in a record.
+4. **Bottom-up partners**: student associations, individual departments and advisors. The advisor workspace works without central IT.
+5. **Open schema**: once the course schema is public, a university can publish its own feed and replace the scraping. The schema is designed to align with existing exchange efforts such as Erasmus Without Paper.
+
 
 - **Sign in first**: the sign-in / create-account page asks *who you are* (future student, current student, academic advisor, department staff), so each person lands straight in their own workspace. Demo accounts are pre-filled; nothing leaves the device.
 - **Four workspaces**, each with its own views, colour and guided tour. Permissions are enforced in the store, not just hidden in the UI:
@@ -99,5 +139,8 @@ src/
     ui/         primitives (Stars, TypeChip, RichText, Modal) · resize (ResizableBox, ResizeHandle, ZoomControl)
 ```
 
-The tutor is a deterministic rule engine, so the demo works offline. To use a hosted LLM, replace
-`tutorRespond()` with an API call and keep its `{ text, cards, bulkAdd }` return shape.
+The tutor is a deterministic rule engine, so the demo works offline. See *Gemma 4 integration plan* above for how a model replaces it.
+
+## Licence
+
+Open source under the MIT licence. See [LICENSE](LICENSE).
