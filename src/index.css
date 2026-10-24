@@ -1,0 +1,296 @@
+@import "tailwindcss";
+
+@theme {
+  --font-sans: "Inter", ui-sans-serif, system-ui, sans-serif;
+}
+
+.scrollbar-thin::-webkit-scrollbar { width: 6px; height: 6px; }
+.scrollbar-thin::-webkit-scrollbar-track { background: var(--scroll-track); }
+.scrollbar-thin::-webkit-scrollbar-thumb { background: var(--scroll-thumb); border-radius: 3px; }
+.scrollbar-thin::-webkit-scrollbar-thumb:hover { background: #94a3b8; }
+
+/* Ghost preview block on the calendar */
+.ghost-block {
+  background: repeating-linear-gradient(
+    45deg,
+    rgba(99, 102, 241, 0.12),
+    rgba(99, 102, 241, 0.12) 10px,
+    rgba(99, 102, 241, 0.24) 10px,
+    rgba(99, 102, 241, 0.24) 20px
+  );
+  border: 2px dashed rgba(79, 70, 229, 0.7);
+}
+
+/* Draft-credit segments on the progress bar */
+.striped {
+  background-image: repeating-linear-gradient(
+    45deg,
+    rgba(255, 255, 255, 0.45),
+    rgba(255, 255, 255, 0.45) 4px,
+    transparent 4px,
+    transparent 8px
+  );
+}
+
+.collision-flash { animation: flash-red 1s ease-in-out infinite; }
+@keyframes flash-red {
+  0%, 100% { background-color: rgba(239, 68, 68, 0.35); }
+  50% { background-color: rgba(239, 68, 68, 0.7); }
+}
+
+.view-enter { animation: view-in 0.25s ease-out; }
+@keyframes view-in {
+  from { opacity: 0; transform: translateY(6px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+.typing-dot { animation: typing 1.4s infinite; }
+.typing-dot:nth-child(2) { animation-delay: 0.2s; }
+.typing-dot:nth-child(3) { animation-delay: 0.4s; }
+@keyframes typing {
+  0%, 60%, 100% { transform: translateY(0); }
+  30% { transform: translateY(-5px); }
+}
+
+
+/* ───────────── Display & accessibility ─────────────
+   Preferences are applied as classes on <html> (see display/useApplyDisplayPrefs.js).
+   Dark mode and the colour-blind palette work by re-pointing Tailwind's colour variables,
+   so every component follows without per-component dark: variants. */
+
+@theme {
+  /* "Ink" never changes with the theme: used for panels that are dark in both modes. */
+  --color-ink-100: #f1f5f9;
+  --color-ink-300: #cbd5e1;
+  --color-ink-400: #94a3b8;
+  --color-ink-500: #64748b;
+  --color-ink-600: #475569;
+  --color-ink-700: #334155;
+  --color-ink-800: #1e293b;
+  --color-ink-900: #0f172a;
+}
+
+:root {
+  /* Slightly darker than Tailwind's defaults so secondary text passes WCAG AA on tinted cards. */
+  --color-slate-400: #5f6f85;
+  --color-slate-500: #556377;
+  --surface: #ffffff;
+  --page: #f8fafc;
+  --edge: #cbd5e1;
+  --grid-line: #e2e8f0;
+  --scroll-track: #f1f5f9;
+  --scroll-thumb: #cbd5e1;
+  --focus: #2563eb;
+}
+
+html { scroll-behavior: smooth; scroll-padding-top: calc(var(--sticky-top, 56px) + 1rem); }
+body { background: var(--page); }
+
+/* Visible keyboard focus everywhere, including elements without their own ring. */
+:focus-visible { outline: 2px solid var(--focus); outline-offset: 2px; }
+
+.skip-link {
+  position: absolute; left: 1rem; top: -100px; z-index: 100;
+  background: var(--focus); color: #fff; padding: 0.5rem 1rem; border-radius: 0.5rem; font-weight: 600;
+}
+.skip-link:focus { top: 1rem; }
+
+/* ── Dark mode ── */
+html.dark {
+  color-scheme: dark;
+  --surface: #111a2e;
+  --page: #0b1120;
+  --edge: #334155;
+  --grid-line: #1f2a3d;
+  --scroll-track: #0b1120;
+  --scroll-thumb: #334155;
+  --focus: #60a5fa;
+  --color-slate-50: #0b1120;
+  --color-slate-100: #1a2436;
+  --color-slate-200: #263247;
+  --color-slate-300: #3a475c;
+  --color-slate-400: #7b8aa1;
+  --color-slate-500: #94a3b8;
+  --color-slate-600: #a9b6c8;
+  --color-slate-700: #cbd5e1;
+  --color-slate-800: #e2e8f0;
+  --color-slate-900: #f1f5f9;
+  --color-red-50: color-mix(in oklab, var(--color-red-500, #ef4444) 14%, #111a2e);
+  --color-red-100: color-mix(in oklab, var(--color-red-500, #ef4444) 26%, #111a2e);
+  --color-amber-50: color-mix(in oklab, var(--color-amber-500, #f59e0b) 14%, #111a2e);
+  --color-amber-100: color-mix(in oklab, var(--color-amber-500, #f59e0b) 26%, #111a2e);
+  --color-green-50: color-mix(in oklab, var(--color-green-500, #22c55e) 14%, #111a2e);
+  --color-green-100: color-mix(in oklab, var(--color-green-500, #22c55e) 26%, #111a2e);
+  --color-emerald-50: color-mix(in oklab, var(--color-emerald-500, #10b981) 14%, #111a2e);
+  --color-emerald-100: color-mix(in oklab, var(--color-emerald-500, #10b981) 26%, #111a2e);
+  --color-blue-50: color-mix(in oklab, var(--color-blue-500, #3b82f6) 14%, #111a2e);
+  --color-blue-100: color-mix(in oklab, var(--color-blue-500, #3b82f6) 26%, #111a2e);
+  --color-indigo-50: color-mix(in oklab, var(--color-indigo-500, #6366f1) 14%, #111a2e);
+  --color-indigo-100: color-mix(in oklab, var(--color-indigo-500, #6366f1) 26%, #111a2e);
+  --color-purple-50: color-mix(in oklab, var(--color-purple-500, #a855f7) 14%, #111a2e);
+  --color-purple-100: color-mix(in oklab, var(--color-purple-500, #a855f7) 26%, #111a2e);
+  --color-sky-50: color-mix(in oklab, var(--color-sky-500, #0ea5e9) 14%, #111a2e);
+  --color-sky-100: color-mix(in oklab, var(--color-sky-500, #0ea5e9) 26%, #111a2e);
+  --color-teal-50: color-mix(in oklab, var(--color-teal-500, #14b8a6) 14%, #111a2e);
+  --color-teal-100: color-mix(in oklab, var(--color-teal-500, #14b8a6) 26%, #111a2e);
+  --color-cyan-50: color-mix(in oklab, var(--color-cyan-500, #06b6d4) 14%, #111a2e);
+  --color-cyan-100: color-mix(in oklab, var(--color-cyan-500, #06b6d4) 26%, #111a2e);
+  --color-yellow-50: color-mix(in oklab, var(--color-yellow-500, #eab308) 14%, #111a2e);
+  --color-yellow-100: color-mix(in oklab, var(--color-yellow-500, #eab308) 26%, #111a2e);
+  --color-orange-50: color-mix(in oklab, var(--color-orange-500, #f97316) 14%, #111a2e);
+  --color-orange-100: color-mix(in oklab, var(--color-orange-500, #f97316) 26%, #111a2e);
+}
+html.dark body { background: var(--page); }
+html.dark * { --tw-ring-offset-color: #111a2e; }
+html.dark .bg-white { background-color: var(--surface); }
+html.dark .bg-white\/90 { background-color: color-mix(in oklab, var(--surface) 90%, transparent); }
+html.dark .bg-white\/95 { background-color: color-mix(in oklab, var(--surface) 95%, transparent); }
+html.dark .hover\:bg-white:hover { background-color: var(--color-slate-100); }
+html.dark .ghost-block { background: repeating-linear-gradient(45deg, rgba(129,140,248,.18), rgba(129,140,248,.18) 10px, rgba(129,140,248,.32) 10px, rgba(129,140,248,.32) 20px); border-color: rgba(165,180,252,.8); }
+html.dark .text-red-600 { color: color-mix(in oklab, var(--color-red-500, #ef4444) 72%, white); }
+html.dark :is(.text-red-700, .text-red-800, .text-red-900) { color: color-mix(in oklab, var(--color-red-500, #ef4444) 50%, white); }
+html.dark :is(.border-red-200, .ring-red-200) { border-color: color-mix(in oklab, var(--color-red-500, #ef4444) 38%, #111a2e); --tw-ring-color: color-mix(in oklab, var(--color-red-500, #ef4444) 38%, #111a2e); }
+html.dark .border-red-300 { border-color: color-mix(in oklab, var(--color-red-500, #ef4444) 55%, #111a2e); }
+html.dark .text-amber-600 { color: color-mix(in oklab, var(--color-amber-500, #f59e0b) 72%, white); }
+html.dark :is(.text-amber-700, .text-amber-800, .text-amber-900) { color: color-mix(in oklab, var(--color-amber-500, #f59e0b) 50%, white); }
+html.dark :is(.border-amber-200, .ring-amber-200) { border-color: color-mix(in oklab, var(--color-amber-500, #f59e0b) 38%, #111a2e); --tw-ring-color: color-mix(in oklab, var(--color-amber-500, #f59e0b) 38%, #111a2e); }
+html.dark .border-amber-300 { border-color: color-mix(in oklab, var(--color-amber-500, #f59e0b) 55%, #111a2e); }
+html.dark .text-green-600 { color: color-mix(in oklab, var(--color-green-500, #22c55e) 72%, white); }
+html.dark :is(.text-green-700, .text-green-800, .text-green-900) { color: color-mix(in oklab, var(--color-green-500, #22c55e) 50%, white); }
+html.dark :is(.border-green-200, .ring-green-200) { border-color: color-mix(in oklab, var(--color-green-500, #22c55e) 38%, #111a2e); --tw-ring-color: color-mix(in oklab, var(--color-green-500, #22c55e) 38%, #111a2e); }
+html.dark .border-green-300 { border-color: color-mix(in oklab, var(--color-green-500, #22c55e) 55%, #111a2e); }
+html.dark .text-emerald-600 { color: color-mix(in oklab, var(--color-emerald-500, #10b981) 72%, white); }
+html.dark :is(.text-emerald-700, .text-emerald-800, .text-emerald-900) { color: color-mix(in oklab, var(--color-emerald-500, #10b981) 50%, white); }
+html.dark :is(.border-emerald-200, .ring-emerald-200) { border-color: color-mix(in oklab, var(--color-emerald-500, #10b981) 38%, #111a2e); --tw-ring-color: color-mix(in oklab, var(--color-emerald-500, #10b981) 38%, #111a2e); }
+html.dark .border-emerald-300 { border-color: color-mix(in oklab, var(--color-emerald-500, #10b981) 55%, #111a2e); }
+html.dark .text-blue-600 { color: color-mix(in oklab, var(--color-blue-500, #3b82f6) 72%, white); }
+html.dark :is(.text-blue-700, .text-blue-800, .text-blue-900) { color: color-mix(in oklab, var(--color-blue-500, #3b82f6) 50%, white); }
+html.dark :is(.border-blue-200, .ring-blue-200) { border-color: color-mix(in oklab, var(--color-blue-500, #3b82f6) 38%, #111a2e); --tw-ring-color: color-mix(in oklab, var(--color-blue-500, #3b82f6) 38%, #111a2e); }
+html.dark .border-blue-300 { border-color: color-mix(in oklab, var(--color-blue-500, #3b82f6) 55%, #111a2e); }
+html.dark .text-indigo-600 { color: color-mix(in oklab, var(--color-indigo-500, #6366f1) 72%, white); }
+html.dark :is(.text-indigo-700, .text-indigo-800, .text-indigo-900) { color: color-mix(in oklab, var(--color-indigo-500, #6366f1) 50%, white); }
+html.dark :is(.border-indigo-200, .ring-indigo-200) { border-color: color-mix(in oklab, var(--color-indigo-500, #6366f1) 38%, #111a2e); --tw-ring-color: color-mix(in oklab, var(--color-indigo-500, #6366f1) 38%, #111a2e); }
+html.dark .border-indigo-300 { border-color: color-mix(in oklab, var(--color-indigo-500, #6366f1) 55%, #111a2e); }
+html.dark .text-purple-600 { color: color-mix(in oklab, var(--color-purple-500, #a855f7) 72%, white); }
+html.dark :is(.text-purple-700, .text-purple-800, .text-purple-900) { color: color-mix(in oklab, var(--color-purple-500, #a855f7) 50%, white); }
+html.dark :is(.border-purple-200, .ring-purple-200) { border-color: color-mix(in oklab, var(--color-purple-500, #a855f7) 38%, #111a2e); --tw-ring-color: color-mix(in oklab, var(--color-purple-500, #a855f7) 38%, #111a2e); }
+html.dark .border-purple-300 { border-color: color-mix(in oklab, var(--color-purple-500, #a855f7) 55%, #111a2e); }
+html.dark .text-sky-600 { color: color-mix(in oklab, var(--color-sky-500, #0ea5e9) 72%, white); }
+html.dark :is(.text-sky-700, .text-sky-800, .text-sky-900) { color: color-mix(in oklab, var(--color-sky-500, #0ea5e9) 50%, white); }
+html.dark :is(.border-sky-200, .ring-sky-200) { border-color: color-mix(in oklab, var(--color-sky-500, #0ea5e9) 38%, #111a2e); --tw-ring-color: color-mix(in oklab, var(--color-sky-500, #0ea5e9) 38%, #111a2e); }
+html.dark .border-sky-300 { border-color: color-mix(in oklab, var(--color-sky-500, #0ea5e9) 55%, #111a2e); }
+html.dark .text-teal-600 { color: color-mix(in oklab, var(--color-teal-500, #14b8a6) 72%, white); }
+html.dark :is(.text-teal-700, .text-teal-800, .text-teal-900) { color: color-mix(in oklab, var(--color-teal-500, #14b8a6) 50%, white); }
+html.dark :is(.border-teal-200, .ring-teal-200) { border-color: color-mix(in oklab, var(--color-teal-500, #14b8a6) 38%, #111a2e); --tw-ring-color: color-mix(in oklab, var(--color-teal-500, #14b8a6) 38%, #111a2e); }
+html.dark .border-teal-300 { border-color: color-mix(in oklab, var(--color-teal-500, #14b8a6) 55%, #111a2e); }
+html.dark .text-cyan-600 { color: color-mix(in oklab, var(--color-cyan-500, #06b6d4) 72%, white); }
+html.dark :is(.text-cyan-700, .text-cyan-800, .text-cyan-900) { color: color-mix(in oklab, var(--color-cyan-500, #06b6d4) 50%, white); }
+html.dark :is(.border-cyan-200, .ring-cyan-200) { border-color: color-mix(in oklab, var(--color-cyan-500, #06b6d4) 38%, #111a2e); --tw-ring-color: color-mix(in oklab, var(--color-cyan-500, #06b6d4) 38%, #111a2e); }
+html.dark .border-cyan-300 { border-color: color-mix(in oklab, var(--color-cyan-500, #06b6d4) 55%, #111a2e); }
+html.dark .text-yellow-600 { color: color-mix(in oklab, var(--color-yellow-500, #eab308) 72%, white); }
+html.dark :is(.text-yellow-700, .text-yellow-800, .text-yellow-900) { color: color-mix(in oklab, var(--color-yellow-500, #eab308) 50%, white); }
+html.dark :is(.border-yellow-200, .ring-yellow-200) { border-color: color-mix(in oklab, var(--color-yellow-500, #eab308) 38%, #111a2e); --tw-ring-color: color-mix(in oklab, var(--color-yellow-500, #eab308) 38%, #111a2e); }
+html.dark .border-yellow-300 { border-color: color-mix(in oklab, var(--color-yellow-500, #eab308) 55%, #111a2e); }
+html.dark .text-orange-600 { color: color-mix(in oklab, var(--color-orange-500, #f97316) 72%, white); }
+html.dark :is(.text-orange-700, .text-orange-800, .text-orange-900) { color: color-mix(in oklab, var(--color-orange-500, #f97316) 50%, white); }
+html.dark :is(.border-orange-200, .ring-orange-200) { border-color: color-mix(in oklab, var(--color-orange-500, #f97316) 38%, #111a2e); --tw-ring-color: color-mix(in oklab, var(--color-orange-500, #f97316) 38%, #111a2e); }
+html.dark .border-orange-300 { border-color: color-mix(in oklab, var(--color-orange-500, #f97316) 55%, #111a2e); }
+
+html.dark :is(.hover\:text-red-600, .hover\:text-red-700):hover { color: color-mix(in oklab, var(--color-red-500, #ef4444) 50%, white); }
+html.dark :is(.hover\:text-amber-600, .hover\:text-amber-700):hover { color: color-mix(in oklab, var(--color-amber-500, #f59e0b) 50%, white); }
+html.dark :is(.hover\:text-green-600, .hover\:text-green-700):hover { color: color-mix(in oklab, var(--color-green-500, #22c55e) 50%, white); }
+html.dark :is(.hover\:text-emerald-600, .hover\:text-emerald-700):hover { color: color-mix(in oklab, var(--color-emerald-500, #10b981) 50%, white); }
+html.dark :is(.hover\:text-blue-600, .hover\:text-blue-700):hover { color: color-mix(in oklab, var(--color-blue-500, #3b82f6) 50%, white); }
+html.dark :is(.hover\:text-indigo-600, .hover\:text-indigo-700):hover { color: color-mix(in oklab, var(--color-indigo-500, #6366f1) 50%, white); }
+html.dark :is(.hover\:text-purple-600, .hover\:text-purple-700):hover { color: color-mix(in oklab, var(--color-purple-500, #a855f7) 50%, white); }
+html.dark :is(.hover\:text-sky-600, .hover\:text-sky-700):hover { color: color-mix(in oklab, var(--color-sky-500, #0ea5e9) 50%, white); }
+html.dark :is(.hover\:text-teal-600, .hover\:text-teal-700):hover { color: color-mix(in oklab, var(--color-teal-500, #14b8a6) 50%, white); }
+html.dark :is(.hover\:text-cyan-600, .hover\:text-cyan-700):hover { color: color-mix(in oklab, var(--color-cyan-500, #06b6d4) 50%, white); }
+html.dark :is(.hover\:text-yellow-600, .hover\:text-yellow-700):hover { color: color-mix(in oklab, var(--color-yellow-500, #eab308) 50%, white); }
+html.dark :is(.hover\:text-orange-600, .hover\:text-orange-700):hover { color: color-mix(in oklab, var(--color-orange-500, #f97316) 50%, white); }
+
+/* ── Colour-blind friendly palette (Okabe–Ito) ──
+   Red/green/amber meanings move to vermillion / bluish green / orange, which stay distinct
+   for protanopia, deuteranopia and tritanopia. Patterns below add a second, non-colour cue. */
+html.cvd-safe {
+  --color-red-500: #D55E00; --color-red-600: #B84F00; --color-red-700: #8F3D00; --color-red-800: #702F00; --color-red-900: #702F00;
+  --color-orange-500: #D55E00; --color-orange-600: #B84F00; --color-orange-700: #8F3D00; --color-orange-800: #702F00; --color-orange-900: #702F00;
+  --color-amber-500: #E69F00; --color-amber-600: #C48700; --color-amber-700: #8A5E00; --color-amber-800: #6B4900; --color-amber-900: #6B4900;
+  --color-yellow-500: #E69F00; --color-yellow-600: #C48700; --color-yellow-700: #8A5E00; --color-yellow-800: #6B4900; --color-yellow-900: #6B4900;
+  --color-green-500: #009E73; --color-green-600: #008462; --color-green-700: #006A4E; --color-green-800: #00533D; --color-green-900: #00533D;
+  --color-emerald-500: #009E73; --color-emerald-600: #008462; --color-emerald-700: #006A4E; --color-emerald-800: #00533D; --color-emerald-900: #00533D;
+  --color-teal-500: #009E73; --color-teal-600: #008462; --color-teal-700: #006A4E; --color-teal-800: #00533D; --color-teal-900: #00533D;
+  --color-blue-500: #0072B2; --color-blue-600: #005F94; --color-blue-700: #004C77; --color-blue-800: #003A5B; --color-blue-900: #003A5B;
+  --color-sky-500: #56B4E9; --color-sky-600: #2F94CC; --color-sky-700: #1F6F9C; --color-sky-800: #185678; --color-sky-900: #185678;
+  --color-cyan-500: #56B4E9; --color-cyan-600: #2F94CC; --color-cyan-700: #1F6F9C; --color-cyan-800: #185678; --color-cyan-900: #185678;
+  --color-indigo-500: #3E5BA9; --color-indigo-600: #33498A; --color-indigo-700: #28396C; --color-indigo-800: #1F2C54; --color-indigo-900: #1F2C54;
+  --color-purple-500: #CC79A7; --color-purple-600: #B0588A; --color-purple-700: #8C416C; --color-purple-800: #6E3355; --color-purple-900: #6E3355;
+}
+html.cvd-safe:not(.dark) {
+  --color-red-50: color-mix(in oklab, #D55E00 8%, white); --color-red-100: color-mix(in oklab, #D55E00 18%, white); --color-red-200: color-mix(in oklab, #D55E00 32%, white); --color-red-300: color-mix(in oklab, #D55E00 48%, white);
+  --color-orange-50: color-mix(in oklab, #D55E00 8%, white); --color-orange-100: color-mix(in oklab, #D55E00 18%, white); --color-orange-200: color-mix(in oklab, #D55E00 32%, white); --color-orange-300: color-mix(in oklab, #D55E00 48%, white);
+  --color-amber-50: color-mix(in oklab, #E69F00 8%, white); --color-amber-100: color-mix(in oklab, #E69F00 18%, white); --color-amber-200: color-mix(in oklab, #E69F00 32%, white); --color-amber-300: color-mix(in oklab, #E69F00 48%, white);
+  --color-yellow-50: color-mix(in oklab, #E69F00 8%, white); --color-yellow-100: color-mix(in oklab, #E69F00 18%, white); --color-yellow-200: color-mix(in oklab, #E69F00 32%, white); --color-yellow-300: color-mix(in oklab, #E69F00 48%, white);
+  --color-green-50: color-mix(in oklab, #009E73 8%, white); --color-green-100: color-mix(in oklab, #009E73 18%, white); --color-green-200: color-mix(in oklab, #009E73 32%, white); --color-green-300: color-mix(in oklab, #009E73 48%, white);
+  --color-emerald-50: color-mix(in oklab, #009E73 8%, white); --color-emerald-100: color-mix(in oklab, #009E73 18%, white); --color-emerald-200: color-mix(in oklab, #009E73 32%, white); --color-emerald-300: color-mix(in oklab, #009E73 48%, white);
+  --color-teal-50: color-mix(in oklab, #009E73 8%, white); --color-teal-100: color-mix(in oklab, #009E73 18%, white); --color-teal-200: color-mix(in oklab, #009E73 32%, white); --color-teal-300: color-mix(in oklab, #009E73 48%, white);
+  --color-blue-50: color-mix(in oklab, #0072B2 8%, white); --color-blue-100: color-mix(in oklab, #0072B2 18%, white); --color-blue-200: color-mix(in oklab, #0072B2 32%, white); --color-blue-300: color-mix(in oklab, #0072B2 48%, white);
+  --color-sky-50: color-mix(in oklab, #56B4E9 8%, white); --color-sky-100: color-mix(in oklab, #56B4E9 18%, white); --color-sky-200: color-mix(in oklab, #56B4E9 32%, white); --color-sky-300: color-mix(in oklab, #56B4E9 48%, white);
+  --color-cyan-50: color-mix(in oklab, #56B4E9 8%, white); --color-cyan-100: color-mix(in oklab, #56B4E9 18%, white); --color-cyan-200: color-mix(in oklab, #56B4E9 32%, white); --color-cyan-300: color-mix(in oklab, #56B4E9 48%, white);
+  --color-indigo-50: color-mix(in oklab, #3E5BA9 8%, white); --color-indigo-100: color-mix(in oklab, #3E5BA9 18%, white); --color-indigo-200: color-mix(in oklab, #3E5BA9 32%, white); --color-indigo-300: color-mix(in oklab, #3E5BA9 48%, white);
+  --color-purple-50: color-mix(in oklab, #CC79A7 8%, white); --color-purple-100: color-mix(in oklab, #CC79A7 18%, white); --color-purple-200: color-mix(in oklab, #CC79A7 32%, white); --color-purple-300: color-mix(in oklab, #CC79A7 48%, white);
+}
+
+/* Course types: compulsory solid, elective stripes, seminar dots, thesis cross-hatch. */
+html.cvd-safe .type-elective { background-image: repeating-linear-gradient(135deg, rgba(255,255,255,.18) 0 3px, transparent 3px 10px); }
+html.cvd-safe .type-seminar { background-image: radial-gradient(rgba(255,255,255,.26) 1.3px, transparent 1.5px); background-size: 9px 9px; }
+html.cvd-safe .type-thesis { background-image: repeating-linear-gradient(45deg, rgba(255,255,255,.2) 0 2px, transparent 2px 9px), repeating-linear-gradient(-45deg, rgba(255,255,255,.2) 0 2px, transparent 2px 9px); }
+/* Keep text on patterned blocks legible. */
+html.cvd-safe :is(.type-elective, .type-seminar, .type-thesis, .type-compulsory) { text-shadow: 0 1px 2px rgba(0, 0, 0, 0.55); }
+/* Degree buckets on the progress bar: core solid, electives stripes, thesis dots. */
+html.cvd-safe .bucket-electives { background-image: repeating-linear-gradient(135deg, rgba(255,255,255,.35) 0 3px, transparent 3px 7px); }
+html.cvd-safe .bucket-thesis { background-image: radial-gradient(rgba(255,255,255,.55) 1.2px, transparent 1.4px); background-size: 6px 6px; }
+/* Collisions always carry a hatch, so they don't rely on red alone. */
+.collision-flash { background-image: repeating-linear-gradient(45deg, rgba(127,29,29,.35) 0 4px, transparent 4px 10px); }
+
+/* ── High contrast ── */
+html.hc {
+  --color-slate-400: #475569;
+  --color-slate-500: #334155;
+  --color-slate-600: #1e293b;
+  --focus: #b45309;
+}
+html.hc.dark {
+  --color-slate-400: #cbd5e1;
+  --color-slate-500: #e2e8f0;
+  --color-slate-600: #f1f5f9;
+  --color-slate-700: #f8fafc;
+  --surface: #000000;
+  --page: #000000;
+  --focus: #fbbf24;
+}
+html.hc :focus-visible { outline-width: 3px; outline-offset: 3px; }
+html.hc :is(a, button.text-blue-600) { text-decoration: underline; text-underline-offset: 2px; }
+html.hc .border { border-width: 2px; }
+html.hc :is(.border-slate-100, .border-slate-200) { border-color: #94a3b8; }
+html.hc .border-slate-300 { border-color: #64748b; }
+html.hc.dark :is(.border-slate-100, .border-slate-200) { border-color: #64748b; }
+html.hc.dark .border-slate-300 { border-color: #94a3b8; }
+
+/* ── Reduced motion (in-app switch; the OS setting is honoured separately below) ── */
+html.reduce-motion *, html.reduce-motion *::before, html.reduce-motion *::after {
+  animation: none !important;
+  transition: none !important;
+  scroll-behavior: auto !important;
+}
+
+/* ── Readable font ── */
+html.font-readable {
+  --font-sans: "Atkinson Hyperlegible", "Inter", ui-sans-serif, system-ui, sans-serif;
+  letter-spacing: 0.01em;
+}
+html.font-readable body { line-height: 1.6; }
+
+@media (prefers-reduced-motion: reduce) {
+  .collision-flash, .view-enter, .typing-dot, .animate-pulse { animation: none !important; }
+}
